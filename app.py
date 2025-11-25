@@ -697,8 +697,8 @@ def handle_chat(version: str):
                 response = agent.generate_conversation_summary(conv_session, tone)
             else:
                 # 免費版使用簡單訊息
-            tone_cfg = get_tone_config(version, tone)
-            response = tone_cfg.get('completed', "感謝使用！")
+                tone_cfg = get_tone_config(version, tone)
+                response = tone_cfg.get('completed', "感謝使用！")
             
             conv_session.add_message("assistant", response)
             return save_and_return(version, session_id, conv_session, {
@@ -714,7 +714,7 @@ def handle_chat(version: str):
             if version == 'paid' and config.get('enable_continuous_chat', False):
                 options = tone_cfg.get('continue_options', ['繼續問問題', '其他生命靈數', '離開'])
             else:
-            options = tone_cfg.get('continue_options', ['其他生命靈數', '離開'])
+                options = tone_cfg.get('continue_options', ['其他生命靈數', '離開'])
             response = f"請選擇：{' / '.join(options)}"
             
             conv_session.add_message("assistant", response)
