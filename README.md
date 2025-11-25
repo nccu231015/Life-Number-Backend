@@ -2,7 +2,7 @@
 
 ## 專案說明
 
-這是生命靈數系統的統一後端，同時支持免費版和付費版。
+這是生命靈數系統的統一後端,同時支持免費版和付費版,並包含天使數字解讀功能。
 
 ## 🎯 架構特點
 
@@ -31,17 +31,34 @@
 
 ## 📋 API 端點
 
-### 免費版
-- `POST /free/api/init_with_tone` - 初始化（選擇語氣）
-- `POST /free/api/chat` - 對話
-- `POST /free/api/reset` - 重置
+### 生命靈數 (Life Number)
 
-### 付費版
-- `POST /paid/api/init_with_tone` - 初始化（選擇語氣）
-- `POST /paid/api/chat` - 對話
-- `POST /paid/api/reset` - 重置
+**免費版:**
+- `POST /life/free/api/init_with_tone` - 初始化（選擇語氣）
+- `POST /life/free/api/chat` - 對話
+- `POST /life/free/api/reset` - 重置
 
-### 其他
+**付費版:**
+- `POST /life/paid/api/init_with_tone` - 初始化（選擇語氣）
+- `POST /life/paid/api/chat` - 對話
+- `POST /life/paid/api/reset` - 重置
+
+### 天使數字 (Angel Number)
+- ✅ **免費版**:
+  - `POST /angel/free/api/init_with_tone`
+  - `POST /angel/free/api/chat`
+  - `POST /angel/free/api/reset`
+  - 支援 9 組固定天使數字 (1111-9999)
+  - 3 種基礎語氣
+
+- ✅ **付費版**:
+  - `POST /angel/paid/api/init_with_tone`
+  - `POST /angel/paid/api/chat`
+  - `POST /angel/paid/api/reset`
+  - **智能模式識別**: 支援任意數字，自動識別重複、階梯、鏡像等 8 種模式
+  - **深度對話**: 可針對解讀結果進行多輪提問
+  - **10 種高級語氣**: 包含關聖帝君、大天使米迦勒等
+  - **完整上下文**: AI 記住對話歷史，提供連貫的指引
 - `GET /health` - 健康檢查
 - `GET /` - API 資訊
 
@@ -75,14 +92,16 @@ curl -X POST http://localhost:8080/paid/api/init_with_tone \
 
 ```
 Life-Number-Backend/
-├── app.py                      # 主應用（500行）
-├── lifenum/                    # 核心包
+├── app.py                      # 主應用
+├── lifenum_api.py              # 生命靈數 API Blueprint
+├── angelnum_api.py             # 天使數字 API Blueprint
+├── lifenum/                    # 生命靈數模組
 │   ├── version_config.py      # 版本配置
 │   ├── tone_config.py         # 語氣配置
 │   ├── agent.py               # Agent 類
-│   ├── gpt_client.py          # GPT 客戶端
 │   ├── utils.py               # 工具函數
 │   ├── config.py              # 環境配置
+│   ├── core_information/      # 核心資訊檔案
 │   └── modules/               # 10個計算模組
 │       ├── core.py
 │       ├── birthday.py
@@ -94,6 +113,14 @@ Life-Number-Backend/
 │       ├── maturity.py
 │       ├── challenge.py
 │       └── karma.py
+├── angelnum/                   # 天使數字模組
+│   ├── agent.py               # Angel Number Agent
+│   └── modules/
+│       └── angel_numbers.py   # 天使數字資料
+├── shared/                     # 共享基礎設施
+│   ├── gpt_client.py          # GPT 客戶端
+│   ├── redis_client.py        # Redis 連線
+│   └── session_store.py       # Session 管理
 ├── requirements.txt
 └── README.md
 ```
@@ -190,6 +217,7 @@ fetch(`${API_BASE}/${API_BASE}/api/chat`, {
 
 ## ✅ 完成的功能
 
+### 生命靈數 (Life Number)
 - [x] 統一後端架構
 - [x] 免費版 3 種語氣
 - [x] 付費版 10 種語氣
@@ -203,3 +231,12 @@ fetch(`${API_BASE}/${API_BASE}/api/chat`, {
   - [x] 深度對話功能（每個模組可繼續問問題）
   - [x] 離開時生成對話總結
   - [x] 根據使用模組推薦水晶和點燈商品
+
+### 天使數字 (Angel Number)
+- [x] 天使數字解讀功能
+- [x] 支援 9 種天使數字 (1111-9999)
+- [x] 3 種語氣選項 (friendly, caring, ritual)
+- [x] AI 自動提取基本資訊
+- [x] 完整的靈性解讀與指引
+- [x] 簡化的對話流程
+- [x] Redis Session 管理

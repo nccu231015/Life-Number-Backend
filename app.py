@@ -10,6 +10,9 @@ import os
 # 導入生命靈數 API Blueprint
 from lifenum_api import lifenum_bp
 
+# 導入天使數字 API Blueprint
+from angelnum_api import angelnum_bp
+
 # 測試 Redis 連線
 from shared.redis_client import test_redis_connection
 
@@ -20,6 +23,7 @@ CORS(app, supports_credentials=True)
 
 # 註冊 Blueprints
 app.register_blueprint(lifenum_bp)
+app.register_blueprint(angelnum_bp)
 
 # 測試 Redis 連線
 print("\n" + "="*60)
@@ -38,7 +42,7 @@ def health():
     return jsonify({
         "status": "healthy",
         "version": "2.0.0",
-        "modules": ["lifenum"]
+        "modules": ["lifenum", "angelnum"]
     })
 
 @app.route("/")
@@ -60,6 +64,20 @@ def index():
                         "/life/paid/api/init_with_tone",
                         "/life/paid/api/chat",
                         "/life/paid/api/reset"
+                    ]
+                }
+            },
+            "angelnum": {
+                "endpoints": {
+                    "free": [
+                        "/angel/free/api/init_with_tone",
+                        "/angel/free/api/chat",
+                        "/angel/free/api/reset"
+                    ],
+                    "paid": [
+                        "/angel/paid/api/init_with_tone",
+                        "/angel/paid/api/chat",
+                        "/angel/paid/api/reset"
                     ]
                 }
             }
