@@ -412,23 +412,7 @@ def handle_chat(version: str):
         # 設置當前模組
         conv_session.current_module = selected_module
         
-        # 付費版 core 模組需要先選擇類別
-        if version == 'paid' and selected_module == 'core' and config.get('enable_category_selection', False):
-            # 進入類別選擇狀態
-            conv_session.state = ConversationState.CORE_CATEGORY_SELECTION
-            response = agent.generate_category_buttons_message(tone)
-            conv_session.add_message("assistant", response)
-            
-            return save_and_return(version, session_id, conv_session, {
-                "session_id": session_id,
-                "response": response,
-                "state": conv_session.state.value,
-                "current_module": selected_module,
-                "show_category_buttons": True,
-                "categories": ["財運事業", "家庭人際", "自我成長", "目標規劃"]
-            })
-        
-        # 其他模組直接執行
+        # 執行模組計算（所有模組都要先計算）
         result = execute_module(
             version,
             selected_module,
@@ -452,7 +436,34 @@ def handle_chat(version: str):
                 "current_module": conv_session.current_module
             })
         
-        # 計算完成後進入繼續選項狀態
+        # 付費版 core 模組：在結果後加上類別選擇
+        if version == 'paid' and selected_module == 'core' and config.get('enable_category_selection', False):
+            # 生成類別選擇提示
+            category_prompt = agent.generate_category_buttons_message(tone)
+            # 合併：核心生命靈數結果 + 類別選擇
+            enhanced_response = f"{result['response']}\n\n{category_prompt}"
+            
+            conv_session.state = ConversationState.CORE_CATEGORY_SELECTION
+            conv_session.add_message("assistant", enhanced_response)
+            
+            # 記錄到 memory
+            conv_session.add_to_memory(
+                "module_analysis",
+                f"已完成核心生命靈數計算，結果為 {result.get('number')}",
+                {"module": "core", "number": result.get("number")}
+            )
+            
+            return save_and_return(version, session_id, conv_session, {
+                "session_id": session_id,
+                "response": enhanced_response,
+                "state": conv_session.state.value,
+                "current_module": selected_module,
+                "number": result.get("number"),
+                "show_category_buttons": True,
+                "categories": ["財運事業", "家庭人際", "自我成長", "目標規劃"]
+            })
+        
+        # 其他模組：計算完成後進入繼續選項狀態
         conv_session.state = ConversationState.CONTINUE_SELECTION
         conv_session.add_message("assistant", result["response"])
         
@@ -477,7 +488,7 @@ def handle_chat(version: str):
         category = None
         if "財運" in user_input or "事業" in user_input:
             category = "財運事業"
-        elif "家庭" in user_input or "人際" in user_input:
+        elif "家庭" in user_input或 "人際" in user_input:
             category = "家庭人際"
         elif "自我" in user_input or "成長" in user_input:
             category = "自我成長"
@@ -485,19 +496,21 @@ def handle_chat(version: str):
             category = "目標規劃"
         
         if not category:
-            response = "請選擇一個類別：財運事業、家庭人際、自我成長、目標規劃"
+            response = "抱歉，我不太確定您想選擇哪個類別。請點選下方的按鈕，或直接告訴我想了解的方向。"
             conv_session.add_message("assistant", response)
             return save_and_return(version, session_id, conv_session, {
                 "session_id": session_id,
                 "response": response,
                 "state": conv_session.state.value,
-                "current_module": "core"
+                "current_module": "core",
+                "show_category_buttons": True,
+                "categories": ["財運事業", "家庭人際", "自我成長", "目標規劃"]
             })
         
         # 保存選擇的類別
         conv_session.selected_category = category
         
-        # 進入問題詢問狀態
+        # 生成詢問問題的提示
         conv_session.state = ConversationState.WAITING_CORE_QUESTION
         response = agent.generate_question_prompt(category, tone)
         conv_session.add_message("assistant", response)
@@ -684,8 +697,8 @@ def handle_chat(version: str):
                 response = agent.generate_conversation_summary(conv_session, tone)
             else:
                 # 免費版使用簡單訊息
-                tone_cfg = get_tone_config(version, tone)
-                response = tone_cfg.get('completed', "感謝使用！")
+            tone_cfg = get_tone_config(version, tone)
+            response = tone_cfg.get('completed', "感謝使用！")
             
             conv_session.add_message("assistant", response)
             return save_and_return(version, session_id, conv_session, {
@@ -701,7 +714,7 @@ def handle_chat(version: str):
             if version == 'paid' and config.get('enable_continuous_chat', False):
                 options = tone_cfg.get('continue_options', ['繼續問問題', '其他生命靈數', '離開'])
             else:
-                options = tone_cfg.get('continue_options', ['其他生命靈數', '離開'])
+            options = tone_cfg.get('continue_options', ['其他生命靈數', '離開'])
             response = f"請選擇：{' / '.join(options)}"
             
             conv_session.add_message("assistant", response)
