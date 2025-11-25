@@ -1,0 +1,58 @@
+# Cloud Build 配置文件
+# 用於自動構建 Docker 鏡像並部署到 Cloud Run
+
+steps:
+  # 步驟 1: 構建 Docker 鏡像
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/life-number-backend:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/life-number-backend:latest'
+      - '.'
+    timeout: '600s'
+
+  # 步驟 2: 推送鏡像到 Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/life-number-backend:$COMMIT_SHA'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/life-number-backend:latest'
+
+  # 步驟 3: 部署到 Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'life-number-backend'
+      - '--image=gcr.io/$PROJECT_ID/life-number-backend:$COMMIT_SHA'
+      - '--region=asia-east1'  # 改為您想要的區域
+      - '--platform=managed'
+      - '--allow-unauthenticated'  # 允許公開訪問
+      - '--memory=512Mi'  # 記憶體配置
+      - '--cpu=1'  # CPU 配置
+      - '--max-instances=10'  # 最大實例數
+      - '--min-instances=0'  # 最小實例數（0 表示可以縮減到零）
+      - '--timeout=120s'  # 請求超時時間
+      - '--concurrency=80'  # 每個實例的並發請求數
+      - '--set-env-vars=OPENAI_MODEL=gpt-4o,PROJECT_LOCALE=zh-TW'
+      - '--set-secrets=OPENAI_API_KEY=OPENAI_API_KEY:latest,REDIS_HOST=REDIS_HOST:latest,REDIS_PORT=REDIS_PORT:latest,REDIS_PASSWORD=REDIS_PASSWORD:latest,REDIS_USERNAME=REDIS_USERNAME:latest'
+
+# 鏡像存儲位置
+images:
+  - 'gcr.io/$PROJECT_ID/life-number-backend:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/life-number-backend:latest'
+
+# 構建選項
+options:
+  machineType: 'N1_HIGHCPU_8'  # 使用高 CPU 機器加速構建
+  logging: CLOUD_LOGGING_ONLY
+  
+# 超時設置（整個構建過程）
+timeout: '1200s'
+
