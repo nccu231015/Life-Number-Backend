@@ -91,7 +91,7 @@ http://localhost:8080
 - 付費版：`/life/paid/api/init_with_tone`
 
 #### Request Body
-```json
+```jsonc
 {
   "tone": "string"  // 語氣選擇
 }
@@ -117,7 +117,7 @@ http://localhost:8080
 - `ariel` - 大天使阿列爾
 
 #### Response
-```json
+```jsonc
 {
   "session_id": "uuid-string",  // ⭐ 後端生成的會話ID，前端必須保存
   "response": "問候語內容",
@@ -163,7 +163,7 @@ curl -X POST http://localhost:8080/life/free/api/init_with_tone \
 - 付費版：`/life/paid/api/chat`
 
 #### Request Body
-```json
+```jsonc
 {
   "session_id": "string",  // ⭐ 必須：由 init_with_tone 返回的會話ID
   "message": "string"      // 必須：用戶輸入內容
@@ -171,7 +171,7 @@ curl -X POST http://localhost:8080/life/free/api/init_with_tone \
 ```
 
 #### Response
-```json
+```jsonc
 {
   "session_id": "string",       // 回傳原session_id
   "response": "AI回應內容",
@@ -266,7 +266,7 @@ curl -X POST http://localhost:8080/life/free/api/init_with_tone \
 ### **免費版流程**
 
 #### 步驟 1：初始化
-```json
+```jsonc
 POST /life/free/api/init_with_tone
 Request: {"tone": "friendly"}
 Response: {
@@ -277,7 +277,7 @@ Response: {
 ```
 
 #### 步驟 2：提交基本資訊
-```json
+```jsonc
 POST /life/free/api/chat
 Request: {
   "session_id": "session-123",
@@ -292,7 +292,7 @@ Response: {
 > 📌 **免費版有 4 個模組可選，且 core 模組沒有類別選擇**
 
 #### 步驟 3：從 4 個模組中選擇一個（例如：core）
-```json
+```jsonc
 POST /life/free/api/chat
 Request: {
   "session_id": "session-123",
@@ -309,7 +309,7 @@ Response: {
 > 📌 **免費版：直接給出完整分析，沒有類別選擇**
 
 #### 步驟 4：選擇離開
-```json
+```jsonc
 POST /life/free/api/chat
 Request: {
   "session_id": "session-123",
@@ -327,7 +327,7 @@ Response: {
 ### **付費版流程（含付費功能）**
 
 #### 步驟 1：初始化
-```json
+```jsonc
 POST /life/paid/api/init_with_tone
 Request: {"tone": "guan_yu"}
 Response: {
@@ -338,7 +338,7 @@ Response: {
 ```
 
 #### 步驟 2：提交基本資訊（含英文名）
-```json
+```jsonc
 POST /life/paid/api/chat
 Request: {
   "session_id": "session-456",
@@ -353,7 +353,7 @@ Response: {
 > 📌 **此時用戶需要從 10 個模組中選擇一個**
 
 #### 步驟 3：從 10 個模組中選擇 core（觸發類別選擇）
-```json
+```jsonc
 POST /life/paid/api/chat
 Request: {
   "session_id": "session-456",
@@ -371,7 +371,7 @@ Response: {
 > 📌 **因為選擇了 core 模組，所以進入類別選擇（這是 core 專屬的額外步驟）**
 
 #### 步驟 4：從 4 個類別中選擇一個（例如：財運事業）
-```json
+```jsonc
 POST /life/paid/api/chat
 Request: {
   "session_id": "session-456",
@@ -387,7 +387,7 @@ Response: {
 ```
 
 #### 步驟 5：提交問題
-```json
+```jsonc
 POST /life/paid/api/chat
 Request: {
   "session_id": "session-456",
@@ -403,7 +403,7 @@ Response: {
 ```
 
 #### 步驟 6：選擇繼續問問題（付費版專屬）
-```json
+```jsonc
 POST /life/paid/api/chat
 Request: {
   "session_id": "session-456",
@@ -418,7 +418,7 @@ Response: {
 ```
 
 #### 步驟 7：提交深度問題
-```json
+```jsonc
 POST /life/paid/api/chat
 Request: {
   "session_id": "session-456",
@@ -433,7 +433,7 @@ Response: {
 ```
 
 #### 步驟 8：選擇其他生命靈數
-```json
+```jsonc
 POST /life/paid/api/chat
 Request: {
   "session_id": "session-456",
@@ -448,7 +448,7 @@ Response: {
 ```
 
 #### 步驟 9：離開（生成對話總結）
-```json
+```jsonc
 POST /life/paid/api/chat
 Request: {
   "session_id": "session-456",
@@ -471,7 +471,7 @@ Response: {
 （省略）
 
 #### 步驟 2：提交基本資訊
-```json
+```jsonc
 POST /life/paid/api/chat
 Request: {
   "session_id": "session-789",
@@ -486,7 +486,7 @@ Response: {
 > 📌 **系統顯示 10 個可選模組**
 
 #### 步驟 3：從 10 個模組中選擇 birthday（非 core 模組）
-```json
+```jsonc
 POST /life/paid/api/chat
 Request: {
   "session_id": "session-789",
@@ -503,7 +503,7 @@ Response: {
 > ⚠️ **注意**：直接進入 `continue_selection` 狀態，沒有 `core_category_selection` 階段
 
 #### 步驟 4：繼續問問題（付費版專屬）
-```json
+```jsonc
 POST /life/paid/api/chat
 Request: {
   "session_id": "session-789",
@@ -518,7 +518,7 @@ Response: {
 ```
 
 #### 步驟 5：提問深度問題
-```json
+```jsonc
 POST /life/paid/api/chat
 Request: {
   "session_id": "session-789",
@@ -533,7 +533,7 @@ Response: {
 ```
 
 #### 步驟 6：選擇其他生命靈數
-```json
+```jsonc
 POST /life/paid/api/chat
 Request: {
   "session_id": "session-789",
@@ -558,14 +558,14 @@ Response: {
 - 付費版：`/life/paid/api/reset`
 
 #### Request Body
-```json
+```jsonc
 {
   "session_id": "string"  // 可選：要刪除的會話ID
 }
 ```
 
 #### Response
-```json
+```jsonc
 {
   "success": true
 }
@@ -640,7 +640,7 @@ Response: {
 ## ⚠️ 錯誤處理
 
 ### 缺少 session_id
-```json
+```jsonc
 {
   "error": "缺少 session_id",
   "message": "請先調用 init_with_tone 初始化會話"
@@ -649,7 +649,7 @@ Response: {
 **HTTP Status**: 400
 
 ### 會話不存在或已過期
-```json
+```jsonc
 {
   "error": "會話不存在或已過期",
   "message": "請重新調用 init_with_tone 初始化會話",
@@ -659,7 +659,7 @@ Response: {
 **HTTP Status**: 404
 
 ### Redis 連線錯誤
-```json
+```jsonc
 {
   "error": "Session 存儲服務暫時不可用",
   "message": "請稍後再試"
@@ -668,7 +668,7 @@ Response: {
 **HTTP Status**: 503
 
 ### OpenAI API 錯誤
-```json
+```jsonc
 {
   "error": "AI 服務暫時不可用",
   "message": "請稍後再試"
@@ -678,7 +678,7 @@ Response: {
 
 ### 請求超時
 Cloud Run 預設超時為 120 秒，超過此時間將返回：
-```json
+```jsonc
 {
   "error": "Request timeout",
   "message": "請求處理時間過長，請重試"
