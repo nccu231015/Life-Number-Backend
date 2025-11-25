@@ -118,7 +118,19 @@ gcloud builds submit --config=cloudbuild.yaml \
 echo -e "\n${GREEN}✅ 部署完成！${NC}"
 
 # ============================================
-# 6. 獲取服務 URL
+# 6. 設置公開訪問（允許未經身份驗證的請求）
+# ============================================
+echo -e "\n${YELLOW}🔓 設置公開訪問權限...${NC}"
+gcloud run services add-iam-policy-binding ${SERVICE_NAME} \
+    --region=${REGION} \
+    --member="allUsers" \
+    --role="roles/run.invoker" \
+    --project=${PROJECT_ID}
+
+echo -e "${GREEN}✅ 已允許公開訪問${NC}"
+
+# ============================================
+# 7. 獲取服務 URL
 # ============================================
 echo -e "\n${YELLOW}📍 獲取服務 URL...${NC}"
 SERVICE_URL=$(gcloud run services describe ${SERVICE_NAME} \

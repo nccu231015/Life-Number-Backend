@@ -488,7 +488,7 @@ def handle_chat(version: str):
         category = None
         if "財運" in user_input or "事業" in user_input:
             category = "財運事業"
-        elif "家庭" in user_input或 "人際" in user_input:
+        elif "家庭" in user_input or "人際" in user_input:
             category = "家庭人際"
         elif "自我" in user_input or "成長" in user_input:
             category = "自我成長"
