@@ -1,31 +1,23 @@
 """
-Session 存儲管理模組
+生命靈數 Session 存儲模組
 處理 ConversationSession 的序列化、反序列化和 Redis 存儲
 """
 
-import json
 from typing import Optional, Dict, Any
 from datetime import datetime
-from .redis_client import get_redis_client, SESSION_TTL
+from shared.session_store import BaseSessionStore
 from .agent import ConversationSession, ConversationState
 
 
-class SessionStore:
-    """Session 存儲管理器"""
+class LifeNumSessionStore(BaseSessionStore):
+    """生命靈數 Session 存儲管理器"""
     
     def __init__(self):
-        self.redis_client = get_redis_client()
+        super().__init__(module_name="lifenum")
     
-    def _make_key(self, version: str, session_id: str) -> str:
+    def save_session(self, version: str, session_id: str, conv_session: ConversationSession) -> bool:
         """
-        生成 Redis key
-        格式: session:{version}:{session_id}
-        """
-        return f"session:{version}:{session_id}"
-    
-    def save(self, version: str, session_id: str, conv_session: ConversationSession) -> bool:
-        """
-        保存會話到 Redis
+        保存生命靈數會話
         
         Args:
             version: 版本（'free' 或 'paid'）
@@ -35,28 +27,12 @@ class SessionStore:
         Returns:
             bool: 是否保存成功
         """
-        try:
-            key = self._make_key(version, session_id)
-            data = self._serialize(conv_session)
-            ttl = SESSION_TTL.get(version, SESSION_TTL['free'])
-            
-            # 使用 setex 設定帶有過期時間的值
-            self.redis_client.setex(
-                key,
-                ttl,
-                json.dumps(data, ensure_ascii=False)
-            )
-            
-            print(f"[Redis] 保存會話: {key}, TTL: {ttl}s")
-            return True
-            
-        except Exception as e:
-            print(f"[Redis] 保存會話失敗: {e}")
-            return False
+        data = self._serialize(conv_session)
+        return self.save(version, session_id, data)
     
-    def load(self, version: str, session_id: str) -> Optional[ConversationSession]:
+    def load_session(self, version: str, session_id: str) -> Optional[ConversationSession]:
         """
-        從 Redis 載入會話
+        從 Redis 載入生命靈數會話
         
         Args:
             version: 版本（'free' 或 'paid'）
@@ -65,80 +41,11 @@ class SessionStore:
         Returns:
             ConversationSession 實例或 None
         """
-        try:
-            key = self._make_key(version, session_id)
-            data_str = self.redis_client.get(key)
-            
-            if data_str is None:
-                print(f"[Redis] 會話不存在: {key}")
-                return None
-            
-            data = json.loads(data_str)
-            conv_session = self._deserialize(data)
-            
-            print(f"[Redis] 載入會話: {key}")
-            return conv_session
-            
-        except Exception as e:
-            print(f"[Redis] 載入會話失敗: {e}")
+        data = self.load(version, session_id)
+        if data is None:
             return None
-    
-    def delete(self, version: str, session_id: str) -> bool:
-        """
-        刪除會話
         
-        Args:
-            version: 版本（'free' 或 'paid'）
-            session_id: 會話 ID
-            
-        Returns:
-            bool: 是否刪除成功
-        """
-        try:
-            key = self._make_key(version, session_id)
-            result = self.redis_client.delete(key)
-            print(f"[Redis] 刪除會話: {key}, 結果: {result}")
-            return result > 0
-            
-        except Exception as e:
-            print(f"[Redis] 刪除會話失敗: {e}")
-            return False
-    
-    def exists(self, version: str, session_id: str) -> bool:
-        """
-        檢查會話是否存在
-        
-        Args:
-            version: 版本（'free' 或 'paid'）
-            session_id: 會話 ID
-            
-        Returns:
-            bool: 是否存在
-        """
-        try:
-            key = self._make_key(version, session_id)
-            return self.redis_client.exists(key) > 0
-        except Exception as e:
-            print(f"[Redis] 檢查會話存在失敗: {e}")
-            return False
-    
-    def get_ttl(self, version: str, session_id: str) -> int:
-        """
-        獲取會話剩餘過期時間
-        
-        Args:
-            version: 版本（'free' 或 'paid'）
-            session_id: 會話 ID
-            
-        Returns:
-            int: 剩餘秒數，-1 表示永不過期，-2 表示不存在
-        """
-        try:
-            key = self._make_key(version, session_id)
-            return self.redis_client.ttl(key)
-        except Exception as e:
-            print(f"[Redis] 獲取 TTL 失敗: {e}")
-            return -2
+        return self._deserialize(data)
     
     def _serialize(self, conv_session: ConversationSession) -> Dict[str, Any]:
         """
@@ -178,9 +85,6 @@ class SessionStore:
             "maturity_number": conv_session.maturity_number,
             "challenge_number": conv_session.challenge_number,
             "karma_numbers": conv_session.karma_numbers if hasattr(conv_session, 'karma_numbers') else None,
-            
-            # 時間戳記
-            "updated_at": datetime.now().isoformat(),
         }
     
     def _deserialize(self, data: Dict[str, Any]) -> ConversationSession:
@@ -231,17 +135,16 @@ class SessionStore:
 
 
 # 全局實例
-_session_store: Optional[SessionStore] = None
+_session_store: Optional[LifeNumSessionStore] = None
 
 
-def get_session_store() -> SessionStore:
+def get_session_store() -> LifeNumSessionStore:
     """
-    獲取 SessionStore 實例（單例模式）
+    獲取 LifeNumSessionStore 實例（單例模式）
     """
     global _session_store
     
     if _session_store is None:
-        _session_store = SessionStore()
+        _session_store = LifeNumSessionStore()
     
     return _session_store
-
