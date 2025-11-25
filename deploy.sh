@@ -56,6 +56,21 @@ echo -e "\n${YELLOW}🔐 設置 Secret Manager...${NC}"
 if [ -f ".env" ]; then
     source .env
     
+    # 檢查必要的環境變量
+    REQUIRED_VARS=("OPENAI_API_KEY" "REDIS_HOST" "REDIS_PORT" "REDIS_PASSWORD" "REDIS_USERNAME")
+    MISSING_VARS=0
+    
+    for VAR in "${REQUIRED_VARS[@]}"; do
+        if [ -z "${!VAR}" ]; then
+            echo -e "${RED}❌ 錯誤: .env 文件中缺少 ${VAR}${NC}"
+            MISSING_VARS=1
+        fi
+    done
+    
+    if [ $MISSING_VARS -eq 1 ]; then
+        exit 1
+    fi
+    
     # 創建或更新 OPENAI_API_KEY
     if gcloud secrets describe OPENAI_API_KEY --project=${PROJECT_ID} &>/dev/null; then
         echo "更新 OPENAI_API_KEY..."
@@ -70,35 +85,37 @@ if [ -f ".env" ]; then
     
     # REDIS_HOST
     if gcloud secrets describe REDIS_HOST --project=${PROJECT_ID} &>/dev/null; then
-        echo -n "redis-11330.c114.us-east-1-4.ec2.cloud.redislabs.com" | gcloud secrets versions add REDIS_HOST --data-file=-
+        echo -n "${REDIS_HOST}" | gcloud secrets versions add REDIS_HOST --data-file=-
     else
-        echo -n "redis-11330.c114.us-east-1-4.ec2.cloud.redislabs.com" | gcloud secrets create REDIS_HOST --data-file=- --replication-policy="automatic"
+        echo -n "${REDIS_HOST}" | gcloud secrets create REDIS_HOST --data-file=- --replication-policy="automatic"
     fi
     
     # REDIS_PORT
     if gcloud secrets describe REDIS_PORT --project=${PROJECT_ID} &>/dev/null; then
-        echo -n "11330" | gcloud secrets versions add REDIS_PORT --data-file=-
+        echo -n "${REDIS_PORT}" | gcloud secrets versions add REDIS_PORT --data-file=-
     else
-        echo -n "11330" | gcloud secrets create REDIS_PORT --data-file=- --replication-policy="automatic"
+        echo -n "${REDIS_PORT}" | gcloud secrets create REDIS_PORT --data-file=- --replication-policy="automatic"
     fi
     
     # REDIS_PASSWORD
     if gcloud secrets describe REDIS_PASSWORD --project=${PROJECT_ID} &>/dev/null; then
-        echo -n "TM8PdRSq7v0i0w1gNV9LGdIgxkZcgrxw" | gcloud secrets versions add REDIS_PASSWORD --data-file=-
+        echo -n "${REDIS_PASSWORD}" | gcloud secrets versions add REDIS_PASSWORD --data-file=-
     else
-        echo -n "TM8PdRSq7v0i0w1gNV9LGdIgxkZcgrxw" | gcloud secrets create REDIS_PASSWORD --data-file=- --replication-policy="automatic"
+        echo -n "${REDIS_PASSWORD}" | gcloud secrets create REDIS_PASSWORD --data-file=- --replication-policy="automatic"
     fi
     
     # REDIS_USERNAME
     if gcloud secrets describe REDIS_USERNAME --project=${PROJECT_ID} &>/dev/null; then
-        echo -n "default" | gcloud secrets versions add REDIS_USERNAME --data-file=-
+        echo -n "${REDIS_USERNAME}" | gcloud secrets versions add REDIS_USERNAME --data-file=-
     else
-        echo -n "default" | gcloud secrets create REDIS_USERNAME --data-file=- --replication-policy="automatic"
+        echo -n "${REDIS_USERNAME}" | gcloud secrets create REDIS_USERNAME --data-file=- --replication-policy="automatic"
     fi
     
     echo -e "${GREEN}✅ Secrets 設置完成${NC}"
 else
     echo -e "${RED}❌ 找不到 .env 文件${NC}"
+    echo "請確保根目錄下有 .env 文件，並包含以下變量："
+    echo "OPENAI_API_KEY, REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, REDIS_USERNAME"
     exit 1
 fi
 
