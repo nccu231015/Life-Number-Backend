@@ -266,22 +266,36 @@ http://localhost:8080
 
 **語氣選項：**
 
-**免費版（3種）：**
-- `friendly` - 親切版
-- `caring` - 貼心版
-- `ritual` - 儀式版
+**1. 生命靈數 (Life Number)**
+- **免費版**: `friendly`, `caring`, `ritual`
+- **付費版**: `guan_yu` (關聖帝君), `michael` (大天使米迦勒) 等 10 種大天使與神明
 
-**付費版（10種）：**
-- `guan_yu` - 關聖帝君
-- `michael` - 大天使米迦勒
-- `gabriel` - 大天使加百列
-- `raphael` - 大天使拉斐爾
-- `uriel` - 大天使烏列爾
-- `zadkiel` - 大天使沙德基爾
-- `jophiel` - 大天使喬菲爾
-- `chamuel` - 大天使沙木爾
-- `metatron` - 大天使梅塔特隆
-- `ariel` - 大天使阿列爾
+**2. 天使數字 (Angel Number)**
+- **免費版**: `friendly`, `caring`, `ritual`
+- **付費版**: 
+  - `guan_yu` (關聖帝君)
+  - `michael` (大天使米迦勒)
+  - `gabriel` (大天使加百列)
+  - `raphael` (大天使拉斐爾)
+  - `uriel` (大天使烏列爾)
+  - `zadkiel` (大天使沙德基爾)
+  - `jophiel` (大天使喬菲爾)
+  - `chamuel` (大天使沙木爾)
+  - `metatron` (大天使梅塔特隆)
+  - `ariel` (大天使阿列爾)
+
+**3. 擲筊 (Divination)**
+- **免費版**: `friendly`, `caring`, `ritual`
+- **付費版**:
+  - `guan_gong` (關聖帝君)
+  - `wealth_god` (五路財神)
+  - `wen_chang` (文昌帝君)
+  - `yue_lao` (月老星君)
+  - `guanyin` (觀音菩薩)
+  - `mazu` (媽祖)
+  - `jiutian` (九天娘娘)
+  - `guanyin_health` (觀音菩薩-健康)
+  - `fude` (福德正神)
 
 #### Response
 ```jsonc
