@@ -53,6 +53,7 @@ htmlcov/
 server.log
 nohup.out
 *.backup
+test_deployment.py
 
 # Temporary files
 *.tmp

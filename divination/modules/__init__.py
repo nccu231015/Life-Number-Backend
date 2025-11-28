@@ -1,0 +1,7 @@
+"""
+擲筊模組數據導出
+"""
+
+from .divination_data import DIVINATION_RESULTS, INTERPRETATION_TEMPLATES
+
+__all__ = ['DIVINATION_RESULTS', 'INTERPRETATION_TEMPLATES']

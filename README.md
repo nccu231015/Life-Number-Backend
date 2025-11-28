@@ -59,6 +59,22 @@
   - **深度對話**: 可針對解讀結果進行多輪提問
   - **10 種高級語氣**: 包含關聖帝君、大天使米迦勒等
   - **完整上下文**: AI 記住對話歷史，提供連貫的指引
+### 擲筊 (Divination)
+- ✅ **免費版**:
+  - `POST /divination/free/api/init_with_tone`
+  - `POST /divination/free/api/chat`
+  - `POST /divination/free/api/reset`
+  - 3 種基礎語氣 (friendly, caring, ritual)
+  - 隨機擲筊結果 (聖筊/笑筊/陰筊)
+
+- ✅ **付費版**:
+  - `POST /divination/paid/api/init_with_tone`
+  - `POST /divination/paid/api/chat`
+  - `POST /divination/paid/api/reset`
+  - **9 種神明語氣**: 包含關聖帝君、媽祖、月老等
+  - **AI 智能解讀**: 根據神明性格與問題進行深度解讀
+  - **持續對話**: 可針對解讀結果進行多輪提問
+
 - `GET /health` - 健康檢查
 - `GET /` - API 資訊
 
@@ -78,12 +94,12 @@ python app.py
 
 ```bash
 # 免費版測試
-curl -X POST http://localhost:8080/free/api/init_with_tone \
+curl -X POST http://localhost:8080/life/free/api/init_with_tone \
   -H "Content-Type: application/json" \
   -d '{"tone": "friendly"}'
 
 # 付費版測試
-curl -X POST http://localhost:8080/paid/api/init_with_tone \
+curl -X POST http://localhost:8080/life/paid/api/init_with_tone \
   -H "Content-Type: application/json" \
   -d '{"tone": "guan_yu"}'
 ```
@@ -95,6 +111,7 @@ Life-Number-Backend/
 ├── app.py                      # 主應用
 ├── lifenum_api.py              # 生命靈數 API Blueprint
 ├── angelnum_api.py             # 天使數字 API Blueprint
+├── divination_api.py           # 擲筊 API Blueprint
 ├── lifenum/                    # 生命靈數模組
 │   ├── version_config.py      # 版本配置
 │   ├── tone_config.py         # 語氣配置
@@ -117,6 +134,9 @@ Life-Number-Backend/
 │   ├── agent.py               # Angel Number Agent
 │   └── modules/
 │       └── angel_numbers.py   # 天使數字資料
+├── divination/                 # 擲筊模組
+│   ├── agent.py               # Divination Agent
+│   └── session_store.py       # Session 管理
 ├── shared/                     # 共享基礎設施
 │   ├── gpt_client.py          # GPT 客戶端
 │   ├── redis_client.py        # Redis 連線
@@ -171,7 +191,7 @@ gcloud run deploy life-number-backend \
 7. **CONTINUE_SELECTION** → 選擇繼續選項
    - 繼續問問題 → 回到 WAITING_QUESTION
    - 其他生命靈數 → 回到 WAITING_MODULE_SELECTION
-   - 離開 → COMPLETED（生成總結和商品推薦）
+   - 離開 → COMPLETED（生成總結和能量調整建議）
 8. **COMPLETED** → 完成
 
 ### Core 模組特殊流程
@@ -239,4 +259,14 @@ fetch(`${API_BASE}/${API_BASE}/api/chat`, {
 - [x] AI 自動提取基本資訊
 - [x] 完整的靈性解讀與指引
 - [x] 簡化的對話流程
+- [x] Redis Session 管理
+
+### 擲筊 (Divination)
+- [x] 擲筊占卜功能
+- [x] 免費版 3 種語氣 (friendly, caring, ritual)
+- [x] 付費版 9 種神明語氣 (關聖帝君、媽祖、月老等)
+- [x] AI 自動提取基本資訊
+- [x] 隨機擲筊結果模擬
+- [x] AI 智能解讀神意 (付費版)
+- [x] 持續對話功能 (付費版)
 - [x] Redis Session 管理
