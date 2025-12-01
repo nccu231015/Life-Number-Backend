@@ -831,6 +831,45 @@ Response: {
 
 ---
 
+---
+
+## 🎨 前端 UI 顯示指南 (Frontend UI Guide)
+
+本節說明在不同狀態下，前端應顯示的 UI 元件與互動方式。
+
+### 1. 生命靈數 (Life Number)
+
+| 狀態 (`state`) | 說明 | 建議 UI 顯示 |
+|---|---|---|
+| `waiting_basic_info` | 等待基本資訊 | **表單輸入**：<br>- 姓名 (Text)<br>- 性別 (Select: 男/女)<br>- 生日 (Date Picker)<br>- 英文名 (Text, 僅付費版) |
+| `waiting_module_selection` | 等待模組選擇 | **按鈕列表**：<br>- 免費版：顯示 4 個模組按鈕 (Core, Birthday, Year, Grid)<br>- 付費版：顯示 10 個模組按鈕 |
+| `core_category_selection` | 核心模組類別選擇<br>(僅付費版 Core) | **按鈕列表**：<br>- 財運事業<br>- 家庭人際<br>- 自我成長<br>- 目標規劃 |
+| `waiting_core_question` | 等待核心模組問題<br>(僅付費版 Core) | **文字輸入框**：<br>- 提示語：「請輸入您想了解的具體問題...」<br>- 發送按鈕 |
+| `waiting_question` | 等待深度問題<br>(付費版深度對話) | **文字輸入框**：<br>- 提示語：「請輸入您的問題...」<br>- 發送按鈕 |
+| `continue_selection` | 繼續選項 | **操作按鈕**：<br>- 「繼續問問題」(僅付費版)<br>- 「選擇其他生命靈數」<br>- 「離開」 |
+| `completed` | 已完成 | **結束畫面**：<br>- 顯示總結與祝福<br>- 「重新開始」按鈕 |
+
+### 2. 天使數字 (Angel Number)
+
+| 狀態 (`state`) | 說明 | 建議 UI 顯示 |
+|---|---|---|
+| `waiting_basic_info` | 等待基本資訊 | **表單輸入**：<br>- 姓名 (Text)<br>- 性別 (Select: 男/女)<br>- 生日 (Date Picker) |
+| `waiting_angel_number` | 等待天使數字 | **免費版**：下拉選單或按鈕 (1111, 2222... 9999)<br>**付費版**：數字輸入框 (Number Input) |
+| `asking_for_question` | 詢問是否有問題<br>(僅付費版) | **對話介面**：<br>- 文字輸入框 (輸入問題)<br>- 「沒有問題/謝謝」按鈕 (結束對話) |
+| `completed` | 已完成 | **結束畫面**：<br>- 顯示完整解讀<br>- 「重新開始」按鈕 |
+
+### 3. 擲筊 (Divination)
+
+| 狀態 (`state`) | 說明 | 建議 UI 顯示 |
+|---|---|---|
+| `waiting_basic_info` | 等待基本資訊 | **表單輸入**：<br>- 姓名 (Text)<br>- 性別 (Select: 男/女)<br>- 生日 (Date Picker) |
+| `waiting_question` | 等待提問 | **文字輸入框**：<br>- 提示語：「請誠心輸入您的問題...」<br>- 「開始擲筊」按鈕 |
+| `divining` | 擲筊中 (過渡狀態) | **動畫效果**：<br>- 顯示擲筊動畫或 Loading 效果<br>- 隨後自動顯示結果 |
+| `asking_for_question` | 持續提問<br>(僅付費版) | **對話介面**：<br>- 文字輸入框 (輸入追問)<br>- 「沒有問題/謝謝」按鈕 (結束對話) |
+| `completed` | 已完成 | **結束畫面**：<br>- 顯示擲筊結果 (聖/笑/陰) 與解讀<br>- 「重新開始」按鈕 |
+
+---
+
 ## ⚠️ 錯誤處理
 
 ### 缺少 session_id
