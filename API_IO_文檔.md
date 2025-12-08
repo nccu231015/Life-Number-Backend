@@ -216,9 +216,15 @@ http://localhost:8080
 ```jsonc
 {
   "session_id": "uuid",
-  "message": "string"
+  "message": "string" // 用戶問題，或在 divining 狀態下傳送 "cast" 或任意字串觸發擲筊
 }
 ```
+
+**狀態流轉說明：**
+1. `waiting_basic_info`: 等待用戶輸入姓名、性別、生日
+2. `waiting_question`: 等待用戶輸入問題
+3. `divining`: 用戶輸入問題後，系統回傳引導文案，進入此狀態。用戶需發送請求（如 message="cast"）來觸發擲筊。
+4. `completed` (免費版) / `asking_for_question` (付費版): 擲筊完成，回傳結果解讀。
 
 **免費版 Response:**
 ```jsonc
@@ -227,7 +233,16 @@ http://localhost:8080
   "response": "AI回應",
   "state": "waiting_question | divining | completed",
   "question": "用戶問題",
-  "divination_result": "holy"  // holy(聖筊), laughing(笑筊), negative(陰筊)
+  "divination_result": "holy"  // 僅在 completed 狀態回傳：holy(聖筊), laughing(笑筊), negative(陰筊)
+}
+```
+
+**免費版 Divining 狀態 Response 範例：**
+```jsonc
+{
+  "session_id": "uuid",
+  "response": "收到你的問題。請誠心默念，然後按下按鈕擲筊。",
+  "state": "divining"
 }
 ```
 
@@ -238,9 +253,18 @@ http://localhost:8080
   "response": "AI回應",
   "state": "waiting_question | divining | asking_for_question | completed",
   "question": "用戶問題",
-  "divination_results": ["holy", "laughing", "negative"],  // 三次擲筊結果
-  "combination_type": "holy_holy_laughing",  // 組合類型
-  "divination_result": "holy_holy_laughing"  // 向後相容欄位
+  "divination_results": ["holy", "laughing", "negative"],  // 僅在 asking_for_question/completed 狀態回傳
+  "combination_type": "holy_holy_laughing",
+  "divination_result": "holy_holy_laughing"
+}
+```
+
+**付費版 Divining 狀態 Response 範例：**
+```jsonc
+{
+  "session_id": "uuid",
+  "response": "收到，王小明。請誠心默念問題三次，準備好後點擊擲筊。",
+  "state": "divining"
 }
 ```
 
