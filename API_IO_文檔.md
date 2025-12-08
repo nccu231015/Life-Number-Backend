@@ -183,9 +183,10 @@ http://localhost:8080
 | 功能 | 免費版 | 付費版 |
 |------|--------|--------|
 | **語氣選擇** | 3 種 (friendly, caring, ritual) | 9 種 (關聖帝君、媽祖、月老等) |
-| **解讀方式** | 固定模板 | AI 智能解讀 (根據神明性格) |
+| **擲筊次數** | 單次擲筊 | **三次擲筊** |
+| **解讀方式** | 固定模板 | **AI 智能解讀** (根據神明性格 + 10 種組合) |
 | **對話深度** | 單次擲筊即結束 | 支援深度對話 (提問 -> 擲筊 -> 解讀 -> 追問) |
-| **結果生成** | 隨機 (聖/笑/陰) | 隨機 (聖/笑/陰) + AI 解讀 |
+| **結果生成** | 隨機 (聖/笑/陰) | **三次隨機** + 組合分析 + AI 解讀 |
 
 ### 📡 端點說明
 
@@ -219,16 +220,41 @@ http://localhost:8080
 }
 ```
 
-**Response:**
+**免費版 Response:**
+```jsonc
+{
+  "session_id": "uuid",
+  "response": "AI回應",
+  "state": "waiting_question | divining | completed",
+  "question": "用戶問題",
+  "divination_result": "holy"  // holy(聖筊), laughing(笑筊), negative(陰筊)
+}
+```
+
+**付費版 Response:**
 ```jsonc
 {
   "session_id": "uuid",
   "response": "AI回應",
   "state": "waiting_question | divining | asking_for_question | completed",
-  "question": "用戶問題", // 僅在擲筊完成時返回
-  "divination_result": "holy" // holy(聖筊), laughing(笑筊), negative(陰筊)
+  "question": "用戶問題",
+  "divination_results": ["holy", "laughing", "negative"],  // 三次擲筊結果
+  "combination_type": "holy_holy_laughing",  // 組合類型
+  "divination_result": "holy_holy_laughing"  // 向後相容欄位
 }
 ```
+
+**付費版組合類型：**
+- `holy_holy_holy` - 三次聖筊（全然支持）
+- `negative_negative_negative` - 三次陰筊（時運不合）
+- `laughing_laughing_laughing` - 三次笑筊（無需執著）
+- `holy_holy_negative` - 兩允一止（需補不足）
+- `holy_holy_laughing` - 兩允一笑（放輕心態）
+- `negative_negative_holy` - 兩止一允（轉機已現）
+- `negative_negative_laughing` - 兩止一笑（不宜強求）
+- `laughing_laughing_holy` - 兩笑一允（專注核心）
+- `laughing_laughing_negative` - 兩笑一止（順其自然）
+- `mixed_all_three` - 聖陰笑齊聚（彈性面對）
 
 ### 🔄 對話流程
 
@@ -236,14 +262,15 @@ http://localhost:8080
 1. **初始化**：選擇語氣
 2. **基本資訊**：輸入姓名、性別、生日
 3. **提交問題**：輸入想問的問題
-4. **擲筊**：系統隨機擲筊並使用模板解讀，對話結束
+4. **擲筊**：系統隨機擲筊（單次）並使用模板解讀，對話結束
 
 #### 付費版流程
 1. **初始化**：選擇語氣 (如關聖帝君)
 2. **基本資訊**：輸入姓名、性別、生日
 3. **提交問題**：輸入想問的問題
-4. **擲筊與解讀**：系統隨機擲筊，AI 扮演神明進行解讀
-5. **持續對話**：系統詢問是否有其他疑問
+4. **擲筊三次**：系統進行三次擲筊
+5. **AI 綜合解讀**：根據三次結果的組合類型（10 種）+ 神明性格 + 用戶問題，生成個性化解讀
+6. **持續對話**：系統詢問是否有其他疑問
    - **有問題**：用戶追問，AI 繼續以神明口吻回答
    - **沒問題**：對話結束
 
@@ -866,7 +893,7 @@ Response: {
 | `waiting_question` | 等待提問 | **文字輸入框**：<br>- 提示語：「請誠心輸入您的問題...」<br>- 「開始擲筊」按鈕 |
 | `divining` | 擲筊中 (過渡狀態) | **動畫效果**：<br>- 顯示擲筊動畫或 Loading 效果<br>- 隨後自動顯示結果 |
 | `asking_for_question` | 持續提問<br>(僅付費版) | **對話介面**：<br>- 文字輸入框 (輸入追問)<br>- 「沒有問題/謝謝」按鈕 (結束對話) |
-| `completed` | 已完成 | **結束畫面**：<br>- 顯示擲筊結果 (聖/笑/陰) 與解讀<br>- 「重新開始」按鈕 |
+| `completed` | 已完成 | **結束畫面**：<br>- 免費版：顯示單次擲筊結果 (聖/笑/陰) 與解讀<br>- 付費版：顯示三次擲筊結果（如「聖筊 → 笑筊 → 陰筊」）+ 組合類型 + AI 解讀<br>- 「重新開始」按鈕 |
 
 ---
 

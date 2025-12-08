@@ -10,6 +10,7 @@ from shared.gpt_client import GPTClient
 
 class DivinationState(Enum):
     """擲筊對話狀態"""
+
     INIT = "init"
     WAITING_BASIC_INFO = "waiting_basic_info"
     WAITING_QUESTION = "waiting_question"
@@ -21,47 +22,45 @@ class DivinationState(Enum):
 
 class DivinationSession:
     """擲筊會話狀態"""
-    
+
     def __init__(self, session_id: str):
         self.session_id = session_id
         self.state = DivinationState.INIT
-        
+
         # 基本資訊
         self.user_name: Optional[str] = None
         self.user_gender: Optional[str] = None
         self.birthdate: Optional[str] = None
-        
+
         # 語氣設置
         self.tone: str = "friendly"
-        
+
         # 問題和結果
         self.question: Optional[str] = None
         self.divination_result: Optional[str] = None  # holy, laughing, negative
-        
+        self.divination_results: List[str] = []  # 三次擲筊結果（付費版）
+
         # 對話歷史
         self.conversation_history: List[Dict[str, str]] = []
-    
+
     def add_message(self, role: str, content: str):
         """添加對話訊息"""
-        self.conversation_history.append({
-            "role": role,
-            "content": content
-        })
+        self.conversation_history.append({"role": role, "content": content})
 
 
 class DivinationAgent:
     """擲筊 Agent - 處理業務邏輯"""
-    
+
     def __init__(self):
         self.gpt_client = GPTClient()
-    
+
     def extract_basic_info(self, user_input: str) -> Dict[str, Optional[str]]:
         """
         使用 AI 提取用戶的基本資訊
-        
+
         Args:
             user_input: 用戶輸入的文字
-            
+
         Returns:
             包含 name, gender, birthdate 的字典
         """
@@ -99,52 +98,56 @@ class DivinationAgent:
                 user_prompt=user_prompt,
                 response_format={"type": "json_object"},
                 temperature=0.3,
-                max_tokens=500
+                max_tokens=500,
             )
-            
+
             print(f"[DEBUG] GPT Response: {response}")
-            
+
             import json
+
             result = json.loads(response)
-            
+
             extracted = {
                 "name": result.get("name"),
                 "gender": result.get("gender"),
-                "birthdate": result.get("birthdate")
+                "birthdate": result.get("birthdate"),
             }
-            
+
             print(f"[DEBUG] Extracted: {extracted}")
             return extracted
-            
+
         except Exception as e:
             print(f"提取基本資訊失敗: {e}")
             import traceback
+
             traceback.print_exc()
             return {"name": None, "gender": None, "birthdate": None}
 
-    def generate_interpretation(self, tone_config: Dict[str, str], user_name: str, question: str, result: str) -> str:
+    def generate_interpretation(
+        self, tone_config: Dict[str, str], user_name: str, question: str, result: str
+    ) -> str:
         """
         生成擲筊解讀（付費版）
-        
+
         Args:
             tone_config: 語氣配置
             user_name: 用戶姓名
             question: 用戶問題
             result: 擲筊結果 (holy, laughing, negative)
-            
+
         Returns:
             生成的解讀文本
         """
         result_meaning = {
             "holy": "聖筊（肯定、允許、順勢）",
             "laughing": "笑筊（暫不回答、調整、時機未到）",
-            "negative": "陰筊（否定、提醒、改變方向）"
+            "negative": "陰筊（否定、提醒、改變方向）",
         }
-        
-        system_prompt = f"""你現在扮演 {tone_config['name']}。
-你的語氣風格是：{tone_config['style']}。
-你的關鍵詞是：{tone_config['keywords']}。
-你的說話範例：{tone_config['example']}。
+
+        system_prompt = f"""你現在扮演 {tone_config["name"]}。
+你的語氣風格是：{tone_config["style"]}。
+你的關鍵詞是：{tone_config["keywords"]}。
+你的說話範例：{tone_config["example"]}。
 
 請根據擲筊結果，為信眾 {user_name} 解讀神意。
 
@@ -165,23 +168,29 @@ class DivinationAgent:
                 system_prompt=system_prompt,
                 user_prompt=f"請為 {user_name} 解讀這個擲筊結果。",
                 temperature=0.7,
-                max_tokens=500
+                max_tokens=500,
             )
             return response
         except Exception as e:
             print(f"生成解讀失敗: {e}")
             return "我此刻感應微弱，請稍後再試。"
 
-    def generate_followup_response(self, tone_config: Dict[str, str], user_name: str, question: str, history: List[Dict[str, str]]) -> str:
+    def generate_followup_response(
+        self,
+        tone_config: Dict[str, str],
+        user_name: str,
+        question: str,
+        history: List[Dict[str, str]],
+    ) -> str:
         """
         生成持續對話回應（付費版）
-        
+
         Args:
             tone_config: 語氣配置
             user_name: 用戶姓名
             question: 用戶的新問題
             history: 對話歷史
-            
+
         Returns:
             生成的回應
         """
@@ -190,11 +199,11 @@ class DivinationAgent:
         for msg in history[-5:]:  # 只取最近 5 條
             role = "信眾" if msg["role"] == "user" else "神明"
             history_text += f"{role}: {msg['content']}\n"
-            
-        system_prompt = f"""你現在扮演 {tone_config['name']}。
-你的語氣風格是：{tone_config['style']}。
-你的關鍵詞是：{tone_config['keywords']}。
-你的說話範例：{tone_config['example']}。
+
+        system_prompt = f"""你現在扮演 {tone_config["name"]}。
+你的語氣風格是：{tone_config["style"]}。
+你的關鍵詞是：{tone_config["keywords"]}。
+你的說話範例：{tone_config["example"]}。
 
 你正在與信眾 {user_name} 進行對話。
 之前的對話記錄：
@@ -212,9 +221,64 @@ class DivinationAgent:
                 system_prompt=system_prompt,
                 user_prompt=f"請回答 {user_name} 的問題。",
                 temperature=0.7,
-                max_tokens=300
+                max_tokens=300,
             )
             return response
         except Exception as e:
             print(f"生成回應失敗: {e}")
             return "我此刻感應微弱，請稍後再試。"
+
+    def generate_three_cast_interpretation(
+        self,
+        tone_config: Dict[str, str],
+        user_name: str,
+        question: str,
+        results: List[str],
+        combination_type: str,
+        base_interpretation: str,
+    ) -> str:
+        """
+        生成三次擲筊的綜合解讀（付費版）
+
+        Args:
+            tone_config: 語氣配置
+            user_name: 用戶姓名
+            question: 用戶問題
+            results: 三次擲筊結果 ["holy", "laughing", "negative"]
+            combination_type: 組合類型
+            base_interpretation: 基礎解讀文本
+
+        Returns:
+            生成的解讀文本
+        """
+        # 結果中文映射
+        result_mapping = {"holy": "聖筊", "laughing": "笑筊", "negative": "陰筊"}
+        results_chinese = [result_mapping[r] for r in results]
+
+        system_prompt = f"""你現在扮演 {tone_config["name"]}。
+你的語氣風格是：{tone_config["style"]}。
+你的關鍵詞是：{tone_config["keywords"]}。
+你的說話範例：{tone_config["example"]}。
+
+擲筊三次的結果：第一次 {results_chinese[0]}、第二次 {results_chinese[1]}、第三次 {results_chinese[2]}
+組合類型：{combination_type}
+
+基礎解讀：
+{base_interpretation}
+
+請根據以上基礎解讀，用你的語氣重新詮釋，並結合信眾 {user_name} 的問題「{question}」給予更具體的指引。
+
+請使用現代白話文，語氣親切自然，不要使用「吾」、「汝」等文言文，但要保持神明應有的威嚴或慈悲感。
+回答長度約 150-200 字。"""
+
+        try:
+            response = self.gpt_client.ask(
+                system_prompt=system_prompt,
+                user_prompt=f"請為 {user_name} 解讀這三次擲筊的結果。",
+                temperature=0.7,
+                max_tokens=500,
+            )
+            return response
+        except Exception as e:
+            print(f"生成三次擲筊解讀失敗: {e}")
+            return base_interpretation  # 如果 AI 失敗，返回基礎解讀
