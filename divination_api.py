@@ -13,36 +13,14 @@ from divination.modules.divination_data import (
     DIVINATION_RESULT_HOLY,
     DIVINATION_RESULT_LAUGHING,
     DIVINATION_RESULT_NEGATIVE,
+    FREE_TONE_PROMPTS,
+    FREE_TONE_GREETINGS,
     PAID_TONE_PROMPTS,
     THREE_CAST_INTERPRETATIONS,
 )
 
 # 創建 Blueprint
 divination_bp = Blueprint("divination", __name__, url_prefix="/divination")
-
-# 免費版語氣配置
-FREE_TONE_PROMPTS = {"friendly": "親切版", "caring": "貼心版", "ritual": "儀式感"}
-
-# 免費版語氣問候語（用戶提供的文案）
-FREE_TONE_GREETINGS = {
-    "friendly": """歡迎來到《擲筊神諭 AI 小神桌》🌺
-最近有什麼想問的嗎？感情、工作，或只是想看運勢都可以～
-把你的問題交給我，我幫你擲筊看看神明怎麼說 🙌
-
-請告訴我你的姓名、性別與生日。
-例如：王小明 男 1990/07/12""",
-    "caring": """親愛的旅人，歡迎回到這座安靜的小神桌🌿擲筊是一份溫柔的指引，不是急著求答案，而是讓心找到方向。
-你可以慢慢說，我會替你擲出屬於你的啟示。
-
-請告訴我你的姓名、性別與生日。
-例如：王小明 男 1990/07/12""",
-    "ritual": """歡迎步入《擲筊神諭之殿》🕯️
-每一筊都象徵著神意的回響。
-準備好後，把你的基本資訊告訴我，我將為你啟動占筊儀式。
-
-請告訴我你的姓名、性別與生日。
-例如：王小明 男 1990/07/12""",
-}
 
 # 未選擇語氣的提示
 NO_TONE_MESSAGE = """小提醒 🌟：請先選擇您想要的對話語氣，
