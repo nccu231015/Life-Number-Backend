@@ -54,6 +54,7 @@ server.log
 nohup.out
 *.backup
 test_deployment.py
+test_divination_flow.py
 
 # Temporary files
 *.tmp

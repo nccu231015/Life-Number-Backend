@@ -9,12 +9,72 @@ import uuid
 from divination.agent import DivinationSession, DivinationAgent, DivinationState
 from divination.session_store import get_session_store
 from divination.modules.divination_data import (
-    BASIC_INFO_ERROR,
-    DIVINATION_RESULT_HOLY,
-    DIVINATION_RESULT_LAUGHING,
-    DIVINATION_RESULT_NEGATIVE,
     THREE_CAST_INTERPRETATIONS,
 )
+
+# ========== 語氣模板配置 ==========
+
+# 基本資訊錯誤提示
+BASIC_INFO_ERROR_TEMPLATES = {
+    "friendly": """嗨嗨，我需要知道你的「姓名、性別、生日」，才能幫你開始擲筊喔 (。・∀・)ノ
+請給我這樣的格式：
+📝 王小明 男 1990/07/12
+或 李小華 女 1985/03/25
+重新給我一次，我就能繼續幫你擲筊啦  🌟""",
+    "caring": """我收到你的訊息了，但好像還少了一些重要資訊 🌜
+為了能替你準確理解與擲筊解讀，需要你再提供一次：「姓名、性別、生日」。
+範例：
+🕊 王小明 男 1990/07/12
+🕊 李小華 女 1985/03/25
+當我收到完整資料後，就能開始替你請示神意""",
+    "ritual": """我已聽見你的回應，但占筊儀式仍需更完整的資料才能啟動 🕯️
+請重新提供「姓名、性別、生日」，以正式開啟擲筊的占問流程
+請以以下格式重新輸入：
+✦ 王小明 男 1990/07/12
+✦ 李小華 女 1985/03/25
+當資料齊備後，我便能為你啟動占筊之門 ✨""",
+}
+
+# 擲筊結果回應模板 (整合 Holy/Laughing/Negative)
+FREE_RESULT_TEMPLATES = {
+    "holy": {
+        "friendly": """{name}，神明給你的是「聖筊」🌟
+這代表你心裡想的方向，其實是對的、能走的、被支持的。
+不用再懷疑自己，你可以放心前進。""",
+        "caring": """{name}，你收到的是「聖筊」🌕
+這象徵著宇宙與神明正默默地站在你這邊，
+你的直覺並沒有錯，這條路值得你信任、值得你踏上。""",
+        "ritual": """{name}，此刻的筊象呈現「聖筊」🕯️
+象徵神意的允許、能量的開啟、道路的被點亮。
+你所詢問之事，已得到肯定的回應。""",
+    },
+    "laughing": {
+        "friendly": """{name}，這次是「笑筊」😉
+不是拒絕喔～比較像神明在跟你說：
+「現在問，可能不是最準的時機。」
+也許你心裡還有一點不確定、或問題方向需要再聚焦。""",
+        "caring": """{name}，你得到的是「笑筊」🌙
+這表示宇宙要你先停一下、再多看清楚一點。
+有些答案不是不能給，而是現在給，可能會影響你真正該走的方向。""",
+        "ritual": """{name}，筊象落下為「笑筊」🕯️
+此為神明示意：
+「時機未定，請先靜候，再行占問。」
+並非否定，而是提醒你問題尚未成熟。""",
+    },
+    "negative": {
+        "friendly": """{name}，這次是「陰筊」🌑
+神明想提醒你：
+「現在這個想法或做法，可能不是最適合你的。」
+別擔心，這不是壞兆頭，只是要你換一個方法、換一條路。""",
+        "caring": """{name}，你收到的是「陰筊」🌘
+這是一種溫柔的提醒：
+你目前心裡的念頭，可能會讓你更累、或偏離真正適合你的道路。
+神明希望你重新審視自己真正的需要。""",
+        "ritual": """{name}，筊象顯示為「陰筊」🕯️
+此乃神意之拒，象徵道路未開、能量未順、方向需更改。
+現下之舉或念，並非命運所薦之途。""",
+    },
+}
 
 # 語氣配置
 
@@ -293,7 +353,7 @@ def handle_chat(version: str):
             # 格式錯誤，返回錯誤訊息
             tone = div_session.tone
             if version == "free":
-                response_text = BASIC_INFO_ERROR[tone]
+                response_text = BASIC_INFO_ERROR_TEMPLATES[tone]
             else:
                 response_text = """資料不完整。請重新提供「姓名、性別、生日」，以便我為你啟動儀式。"""
 
@@ -344,12 +404,11 @@ def handle_chat(version: str):
             result = random.choice(["holy", "laughing", "negative"])
             div_session.divination_result = result
 
-            if result == "holy":
-                response_text = DIVINATION_RESULT_HOLY[tone].format(name=name)
-            elif result == "laughing":
-                response_text = DIVINATION_RESULT_LAUGHING[tone].format(name=name)
-            else:  # negative
-                response_text = DIVINATION_RESULT_NEGATIVE[tone].format(name=name)
+            # 使用新的整合模板結構
+            if result in FREE_RESULT_TEMPLATES:
+                response_text = FREE_RESULT_TEMPLATES[result][tone].format(name=name)
+            else:
+                response_text = "結果生成錯誤，請重試。"
 
             # 完成擲筊
             div_session.state = DivinationState.COMPLETED
