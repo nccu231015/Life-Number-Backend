@@ -440,7 +440,7 @@ class LifeNumberAgent:
                 summary += f"\n\n願這些精確的靈性數據為您的生命帶來最佳化的配置。宇宙秩序將持續為您服務。"
             else:
                 summary += "雖然運算時間短暫，但連結已建立。願宇宙的完美秩序與您同在。"
-        else:  # ariel
+        elif tone == "ariel":
             summary = f"親愛的，今天豐盛的對話就到這裡。\n\n"
             if summary_points:
                 summary += "在大地的滋養下，我們一起種下了：\n" + "\n".join(
@@ -451,6 +451,16 @@ class LifeNumberAgent:
                 summary += (
                     "每一次的相遇都如種子般珍貴。願您帶著大地的祝福，讓生命豐盛綻放。"
                 )
+        else:
+            # 默認使用友善語氣
+            summary = f"今天的對話就到這裡。\n\n"
+            if summary_points:
+                summary += "我們一起探索了：\n" + "\n".join(
+                    [f"✨ {point}" for point in summary_points]
+                )
+                summary += f"\n\n感謝您的信任，期待下次再見。"
+            else:
+                summary += "感謝使用！期待下次再見 ✨"
 
         # 根據解析過的模組添加水晶和點燈建議
         if analyzed_modules:

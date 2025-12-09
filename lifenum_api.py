@@ -758,10 +758,12 @@ def handle_chat(version: str):
 
             # 付費版生成完整的對話總結（包含水晶和點燈推薦）
             if version == "paid":
-                response = agent.generate_conversation_summary(conv_session, tone)
+                response = agent.generate_conversation_summary(
+                    conv_session, conv_session.tone
+                )
             else:
                 # 免費版使用簡單訊息
-                tone_cfg = get_tone_config(version, tone)
+                tone_cfg = get_tone_config(version, conv_session.tone)
                 response = tone_cfg.get("completed", "感謝使用！")
 
             conv_session.add_message("assistant", response)
