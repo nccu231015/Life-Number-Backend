@@ -402,7 +402,7 @@ def handle_chat(version: str):
             user_prompt = f"請分析 {selected_date} 這天是否適合「{message}」。"
 
             try:
-                ai_response = gpt_client.chat(
+                ai_response = gpt_client.ask(
                     system_prompt=system_prompt,
                     user_prompt=user_prompt,
                     temperature=0.7,
