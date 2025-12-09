@@ -340,7 +340,7 @@ def handle_chat(version: str):
 
         if error_msg:
             # 使用 agent 的錯誤訊息生成函數
-            response = agent.generate_error_message(tone)
+            response = agent.generate_error_message(conv_session.tone)
             conv_session.add_message("assistant", response)
             return save_and_return(
                 version,
@@ -444,7 +444,7 @@ def handle_chat(version: str):
             and config.get("enable_category_selection", False)
         ):
             # 生成類別選擇提示
-            category_prompt = agent.generate_category_buttons_message(tone)
+            category_prompt = agent.generate_category_buttons_message(conv_session.tone)
             # 合併：核心生命靈數結果 + 類別選擇
             enhanced_response = f"{result['response']}\n\n{category_prompt}"
 
@@ -532,7 +532,7 @@ def handle_chat(version: str):
 
         # 生成詢問問題的提示
         conv_session.state = ConversationState.WAITING_CORE_QUESTION
-        response = agent.generate_question_prompt(category, tone)
+        response = agent.generate_question_prompt(category, conv_session.tone)
         conv_session.add_message("assistant", response)
 
         return save_and_return(
@@ -687,23 +687,33 @@ def handle_chat(version: str):
                 # 根據當前模組生成對應的提示
                 current_module = conv_session.current_module
                 if current_module == "birthday":
-                    response = agent.generate_birthday_question_prompt(tone)
+                    response = agent.generate_birthday_question_prompt(
+                        conv_session.tone
+                    )
                 elif current_module == "grid":
-                    response = agent.generate_grid_question_prompt(tone)
+                    response = agent.generate_grid_question_prompt(conv_session.tone)
                 elif current_module == "year":
-                    response = agent.generate_year_question_prompt(tone)
+                    response = agent.generate_year_question_prompt(conv_session.tone)
                 elif current_module == "soul":
-                    response = agent.generate_soul_question_prompt(tone)
+                    response = agent.generate_soul_question_prompt(conv_session.tone)
                 elif current_module == "personality":
-                    response = agent.generate_personality_question_prompt(tone)
+                    response = agent.generate_personality_question_prompt(
+                        conv_session.tone
+                    )
                 elif current_module == "expression":
-                    response = agent.generate_expression_question_prompt(tone)
+                    response = agent.generate_expression_question_prompt(
+                        conv_session.tone
+                    )
                 elif current_module == "maturity":
-                    response = agent.generate_maturity_question_prompt(tone)
+                    response = agent.generate_maturity_question_prompt(
+                        conv_session.tone
+                    )
                 elif current_module == "challenge":
-                    response = agent.generate_challenge_question_prompt(tone)
+                    response = agent.generate_challenge_question_prompt(
+                        conv_session.tone
+                    )
                 elif current_module == "karma":
-                    response = agent.generate_karma_question_prompt(tone)
+                    response = agent.generate_karma_question_prompt(conv_session.tone)
                 else:
                     response = "請問你想了解什麼？"
 
@@ -727,16 +737,16 @@ def handle_chat(version: str):
 
             # 免費版使用簡單訊息
             if version == "free":
-                if tone == "friendly":
+                if conv_session.tone == "friendly":
                     response = "好的！請選擇你想了解的其他模組～"
-                elif tone == "caring":
+                elif conv_session.tone == "caring":
                     response = "當然可以 ✨ 請選擇你想了解的其他模組吧～"
                 else:  # ritual
                     response = "好的。請選擇您想了解的其他模組。"
             else:
                 # 付費版使用 agent 訊息
                 response = agent.generate_return_to_modules_message(
-                    conv_session.user_name, conv_session.user_gender, tone
+                    conv_session.user_name, conv_session.user_gender, conv_session.tone
                 )
 
             conv_session.add_message("assistant", response)

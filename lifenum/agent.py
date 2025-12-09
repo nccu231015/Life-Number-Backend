@@ -231,7 +231,7 @@ class LifeNumberAgent:
             return "這裡有四個滿有愛的面向等待與您連結。選擇一個您最渴望理解的關係層面，讓愛為我們指引。"
         elif tone == "metatron":
             return "系統提供四個分析模組供您選擇。請選擇一個您需要最佳化的領域，系統將執行精確分析。"
-        else:  # ariel
+        elif tone == "ariel":
             return "大地為您提供四個豐盛的面向可供探索。選擇一個您最想滋養的生命面向，讓自然的智慧為您指引。"
 
     def generate_question_prompt(self, category: str, tone: str = "guan_yu") -> str:
@@ -267,7 +267,7 @@ class LifeNumberAgent:
             return (
                 f"您已選擇「{category_name}」模組。請輸入您需要分析的具體問題或課題。"
             )
-        else:  # ariel
+        elif tone == "ariel":
             return f"您選擇了「{category_name}」的豐盛領域。在這個面向上，有什麼需要大地的滋養和支持？"
 
     def generate_continue_prompt(self, tone: str = "guan_yu") -> str:
@@ -292,7 +292,7 @@ class LifeNumberAgent:
             return "您可以繼續在這個面向探索愛，或選擇其他生命靈數，也可以帶著滿心的愛離開。愛將永遠伴隨著您。"
         elif tone == "metatron":
             return "您可以繼續在此模組進行深度分析，或選擇其他生命靈數模組，也可以結束今日的系統運算。數據將持續為您服務。"
-        else:  # ariel
+        elif tone == "ariel":
             return "您可以繼續在這個面向尋求滋養，或探索其他生命靈數，也可以帶著大地的祝福離開。豐盛將永遠與您同在。"
 
     def generate_conversation_summary(self, session, tone: str = "guan_yu") -> str:
@@ -569,7 +569,7 @@ class LifeNumberAgent:
             return f"最近在人際關係或是與自己的關係上，有什麼需要更多愛與理解的地方嗎？\n\n我將溫暖地為{you}探索：愛的內在力量、關係中的成長方向、天賦中的連結能量、年度愛的課題，\n以及如何透過自我接納與理解，創造更美好的關係連結。\n\n讓愛成為{you}生命中最強大的力量。"
         elif tone == "metatron":
             return f"最近是否有需要更明確的方向，或是渴望建立更完善的生活秩序？\n\n我將以宇宙的精確性為{you}分析：生命架構的核心組成、靈性成長的系統化路徑、天賦才能的結構分析、年度能量的精準配置，\n以及如何透過紀律與秩序，讓{you}的生命達到最佳化的運行狀態。\n\n遵循宇宙法則，成就完美秩序。"
-        else:  # ariel
+        elif tone == "ariel":
             return f"最近有什麼讓{you}感到匱乏，或是渴望更多支持與滋養的地方嗎？\n\n我將用大地的智慧為{you}揭示：內在豐盛的種子、生命繁榮的自然法則、天賦中的創造力量、年度豐收的時機，\n以及如何與宇宙的豐盛能量連結，讓{you}的生命如花園般茂盛綻放。\n\n相信豐盛，它本就屬於{you}。"
 
     def generate_birthday_continue_message(self, tone: str = "guan_yu") -> str:
@@ -592,7 +592,7 @@ class LifeNumberAgent:
             return "您的天賦愛能已經覺醒。您可以繼續在這個面向探索，或選擇其他生命靈數，也可以帶著滿心的愛離開。愛將永遠伴隨著您。"
         elif tone == "metatron":
             return "您的天賦系統已完成分析。您可以繼續在此模組進行深度探索，或選擇其他生命靈數模組，也可以結束今日的系統運算。數據將持續為您服務。"
-        else:  # ariel
+        elif tone == "ariel":
             return "您的天賦種子已經種下。您可以繼續在這個面向尋求滋養，或探索其他生命靈數，也可以帶著大地的祝福離開。豐盛將永遠與您同在。"
 
     def generate_birthday_question_prompt(self, tone: str = "guan_yu") -> str:
@@ -615,7 +615,7 @@ class LifeNumberAgent:
             return "親愛的，您想要在天賦或生活的哪個關係面向得到更多愛的理解？讓我們用愛來探索這些問題。"
         elif tone == "metatron":
             return "請輸入您需要分析的天賦應用問題或生活課題。系統將根據您的生日數特質進行精確分析。"
-        else:  # ariel
+        elif tone == "ariel":
             return "您想要在天賦或生活的哪個面向獲得更多滋養？有什麼需要大地智慧支持的地方嗎？讓自然的力量為您指引。"
 
     def generate_grid_continue_message(self, tone: str = "guan_yu") -> str:
@@ -638,7 +638,7 @@ class LifeNumberAgent:
             return "您的九宮格愛能已經覺醒。您可以繼續在這個面向探索，或選擇其他生命靈數，也可以帶著滿心的愛離開。愛將永遠伴隨著您。"
         elif tone == "metatron":
             return "您的九宮格系統已完成分析。您可以繼續在此模組進行深度探索，或選擇其他生命靈數模組，也可以結束今日的系統運算。數據將持續為您服務。"
-        else:  # ariel
+        elif tone == "ariel":
             return "您的九宮格種子已經種下。您可以繼續在這個面向尋求滋養，或探索其他生命靈數，也可以帶著大地的祝福離開。豐盛將永遠與您同在。"
 
     def generate_grid_question_prompt(self, tone: str = "guan_yu") -> str:
@@ -661,7 +661,7 @@ class LifeNumberAgent:
             return "親愛的，您想要在九宮格特質或生活的哪個關係面向得到更多愛的理解？讓我們用愛來探索這些問題。"
         elif tone == "metatron":
             return "請輸入您需要分析的九宮格應用問題或生活課題。系統將根據您的九宮格特質進行精確分析。"
-        else:  # ariel
+        elif tone == "ariel":
             return "您想要在九宮格特質或生活的哪個面向獲得更多滋養？有什麼需要大地智慧支持的地方嗎？讓自然的力量為您指引。"
 
     def generate_year_continue_message(self, tone: str = "guan_yu") -> str:
@@ -684,7 +684,7 @@ class LifeNumberAgent:
             return "您的流年愛能已經覺醒。您可以繼續在這個面向探索，或選擇其他生命靈數，也可以帶著滿心的愛離開。愛將永遠伴隨著您。"
         elif tone == "metatron":
             return "您的流年系統已完成分析。您可以繼續在此模組進行深度探索，或選擇其他生命靈數模組，也可以結束今日的系統運算。數據將持續為您服務。"
-        else:  # ariel
+        elif tone == "ariel":
             return "您的流年種子已經種下。您可以繼續在這個面向尋求滋養，或探索其他生命靈數，也可以帶著大地的祝福離開。豐盛將永遠與您同在。"
 
     def generate_year_question_prompt(self, tone: str = "guan_yu") -> str:
@@ -709,7 +709,7 @@ class LifeNumberAgent:
             return "親愛的，您想要在流年運勢或生活規劃的哪個關係面向得到更多愛的理解？讓我們用愛來探索這些問題。"
         elif tone == "metatron":
             return "請輸入您需要分析的流年應用問題或年度規劃課題。系統將根據您的流年數特質進行精確分析。"
-        else:  # ariel
+        elif tone == "ariel":
             return "您想要在流年運勢或生活規劃的哪個面向獲得更多滋養？有什麼需要大地智慧支持的地方嗎？讓自然的力量為您指引。"
 
     def generate_soul_continue_message(self, tone: str = "guan_yu") -> str:
@@ -732,7 +732,7 @@ class LifeNumberAgent:
             return "我已為您揭示內心對愛與理解的渴望。您可以選擇："
         elif tone == "metatron":
             return "靈魂數分析完成。您可以選擇以下行動："
-        else:  # ariel
+        elif tone == "ariel":
             return "我已為您揭示內心豐盛的渴望，願您感受到自然的支持。您可以選擇："
 
     def generate_soul_question_prompt(self, tone: str = "guan_yu") -> str:
@@ -757,7 +757,7 @@ class LifeNumberAgent:
             return "親愛的，您想要在內心渴望或精神追求的哪個面向得到更多愛的理解？讓我們用愛來探索這些內在問題。"
         elif tone == "metatron":
             return "請輸入您需要分析的內心渴望問題或精神追求課題。系統將根據您的靈魂數特質進行精確分析。"
-        else:  # ariel
+        elif tone == "ariel":
             return "您想要在內心渴望或精神追求的哪個面向獲得更多滋養？有什麼需要自然智慧支持的內在成長嗎？讓大地的力量為您指引。"
 
     def generate_personality_continue_message(self, tone: str = "guan_yu") -> str:
@@ -780,7 +780,7 @@ class LifeNumberAgent:
             return "我已為您揭示外在的關係互動方式。您可以選擇："
         elif tone == "metatron":
             return "人格數分析完成。您可以選擇以下行動："
-        else:  # ariel
+        elif tone == "ariel":
             return "我已為您揭示外在豐盛的人格形象，願您感受到自然的支持。您可以選擇："
 
     def generate_personality_question_prompt(self, tone: str = "guan_yu") -> str:
@@ -805,7 +805,7 @@ class LifeNumberAgent:
             return "親愛的，您想要在外在人格或社交印象的哪個面向得到更多愛的理解？讓我們用愛來探索這些形象問題。"
         elif tone == "metatron":
             return "請輸入您需要分析的外在人格問題或社交印象課題。系統將根據您的人格數特質進行精確分析。"
-        else:  # ariel
+        elif tone == "ariel":
             return "您想要在外在人格或社交印象的哪個面向獲得更多滋養？有什麼需要自然智慧支持的形象成長嗎？讓大地的力量為您指引。"
 
     def generate_expression_continue_message(self, tone: str = "guan_yu") -> str:
@@ -828,7 +828,7 @@ class LifeNumberAgent:
             return "我已為您揭示溝通中的愛與連結方式。您可以選擇："
         elif tone == "metatron":
             return "表達數分析完成。您可以選擇以下行動："
-        else:  # ariel
+        elif tone == "ariel":
             return "我已為您揭示豐盛的表達風格，願您感受到自然的支持。您可以選擇："
 
     def generate_expression_question_prompt(self, tone: str = "guan_yu") -> str:
@@ -853,7 +853,7 @@ class LifeNumberAgent:
             return "親愛的，您想要在表達風格或溝通方式的哪個面向得到更多愛的理解？讓我們用愛來探索這些溝通問題。"
         elif tone == "metatron":
             return "請輸入您需要分析的表達風格問題或溝通方式課題。系統將根據您的表達數特質進行精確分析。"
-        else:  # ariel
+        elif tone == "ariel":
             return "您想要在表達風格或溝通方式的哪個面向獲得更多滋養？有什麼需要自然智慧支持的溝通成長嗎？讓大地的力量為您指引。"
 
     def generate_maturity_continue_message(
@@ -878,7 +878,7 @@ class LifeNumberAgent:
             return f"親愛的，您的成熟數為 {number}，我已用愛為您探索人生成熟期的愛的智慧與內在覺醒。\n\n還有什麼需要愛的理解與滋養的地方嗎？"
         elif tone == "metatron":
             return f"成熟數 {number} 分析完成。已為您提供人生後半段的系統化發展方向與潛力配置。\n\n請輸入下一步需要分析的項目。"
-        else:  # ariel
+        elif tone == "ariel":
             return f"您的成熟數為 {number}，我已用大地的智慧為您揭示人生成熟期的豐盛潛力與自然成長。\n\n還有什麼需要滋養與綻放的面向嗎？"
 
     def generate_maturity_question_prompt(self, tone: str = "guan_yu") -> str:
@@ -901,7 +901,7 @@ class LifeNumberAgent:
             return "親愛的，您想要在人生後半段或成熟期發展的哪個面向得到更多愛的理解？讓我們用愛來探索這些成熟智慧。"
         elif tone == "metatron":
             return "請輸入您需要分析的人生後半段問題或成熟期發展課題。系統將根據您的成熟數特質進行精確分析。"
-        else:  # ariel
+        elif tone == "ariel":
             return "您想要在人生後半段或成熟期發展的哪個面向獲得更多滋養？有什麼需要自然智慧支持的成熟成長嗎？讓大地的力量為您指引。"
 
     def generate_challenge_continue_message(self, tone: str = "guan_yu") -> str:
@@ -924,7 +924,7 @@ class LifeNumberAgent:
             return "親愛的，我已用愛為您探索此生需要克服的挑戰與成長課題。\n\n還有什麼需要愛的理解與滋養的地方嗎？"
         elif tone == "metatron":
             return "挑戰數分析完成。已為您提供此生需要克服的系統化課題與突破方向。\n\n請輸入下一步需要分析的項目。"
-        else:  # ariel
+        elif tone == "ariel":
             return "我已用大地的智慧為您揭示此生需要克服的自然課題與成長方向。\n\n還有什麼需要滋養與綻放的面向嗎？"
 
     def generate_challenge_question_prompt(self, tone: str = "guan_yu") -> str:
@@ -949,7 +949,7 @@ class LifeNumberAgent:
             return "親愛的，您想要在此生課題或限制的哪個面向得到更多愛的理解？讓我們用愛來探索這些挑戰智慧。"
         elif tone == "metatron":
             return "請輸入您需要分析的此生挑戰問題或限制課題。系統將根據您的挑戰數特質進行精確分析。"
-        else:  # ariel
+        elif tone == "ariel":
             return "您想要在此生課題或限制的哪個面向獲得更多滋養？有什麼需要自然智慧支持的突破成長嗎？讓大地的力量為您指引。"
 
     def generate_karma_continue_message(self, tone: str = "guan_yu") -> str:
@@ -972,7 +972,7 @@ class LifeNumberAgent:
             return "親愛的，我已用愛為您探索前世的功課與今生的成長之路。\n\n還有什麼需要愛的理解與滋養的地方嗎？"
         elif tone == "metatron":
             return "業力數分析完成。已為您提供前世課題與今生轉化的系統化分析。\n\n請輸入下一步需要分析的項目。"
-        else:  # ariel
+        elif tone == "ariel":
             return "我已用大地的智慧為您揭示前世的根源與今生的豐盛成長。\n\n還有什麼需要滋養與綻放的面向嗎？"
 
     def generate_karma_question_prompt(self, tone: str = "guan_yu") -> str:
@@ -995,7 +995,7 @@ class LifeNumberAgent:
             return "親愛的，您想要在前世業力或今生轉化的哪個面向得到更多愛的理解？讓我們用愛來探索這些靈魂智慧。"
         elif tone == "metatron":
             return "請輸入您需要分析的前世業力問題或今生轉化課題。系統將根據您的業力數特質進行精確分析。"
-        else:  # ariel
+        elif tone == "ariel":
             return "您想要在前世業力或今生轉化的哪個面向獲得更多滋養？有什麼需要自然智慧支持的靈魂成長嗎？讓大地的力量為您指引。"
 
     def extract_birthdate_with_ai(
@@ -1188,7 +1188,7 @@ class LifeNumberAgent:
             return f"我是大天使沙木爾，愛與關係的守護天使。\n\n親愛的心靈，我感受到了你溫暖的能量。你的到來讓這個空間充滿了愛的可能性。\n\n請溫暖地分享你的姓名、性別與出生時刻，讓我感受你心跳的節奏。\n\n我將溫暖地為你探索：愛的內在力量、關係中的成長方向、天賦中的連結能量、年度愛的課題，\n以及如何透過自我接納與理解，創造更美好的關係連結。\n\n讓愛成為你生命中最強大的力量。❤️"
         elif tone == "metatron":
             return f"我是大天使梅塔特隆，神聖秩序的記錄者。\n\n系統已準備就緒。根據靈性法則的精密運算，你的到來已被記錄在宇宙的神聖幾何中。\n\n請精確提供你的姓名、性別與出生時刻數據，以便進行生命藍圖的完整分析。\n\n我將以宇宙的精確性為你分析：生命架構的核心組成、靈性成長的系統化路徑、天賦才能的結構分析、年度能量的精準配置，\n以及如何透過紀律與秩序，讓你的生命達到最佳化的運行狀態。\n\n遵循宇宙法則，成就完美秩序。⚡"
-        else:  # ariel
+        elif tone == "ariel":
             return f"我是大天使阿列爾，大地與豐盛的守護者。\n\n親愛的孩子，歡迎來到這個充滿生命力的神聖空間。我感受到你與自然節拍的共鳴，你的能量如同春天的種子，充滿了無限的可能。\n\n請自然地分享你的姓名、性別與生辰，讓我們一起探索你內在的豐盛花園。\n\n我將用大地的智慧為你揭示：內在豐盛的種子、生命繁榮的自然法則、天賦中的創造力量、年度豐收的時機，\n以及如何與宇宙的豐盛能量連結，讓你的生命如花園般茂盛綻放。\n\n相信豐盛，它本就屬於你。🌿"
 
     def generate_greeting(
@@ -1272,7 +1272,7 @@ class LifeNumberAgent:
             return f"親愛的{name}，我的心感受到{you}最需要「{module_name}」的愛與理解。\n\n{reason}\n\n讓我用愛為{you}指引這條路，{you}願意嗎？（請回覆「好」或「不要」）"
         elif tone == "metatron":
             return f"{name}，根據宇宙秩序的精確運算，「{module_name}」是{you}當前最佳的靈性配置。\n\n{reason}\n\n{you}是否同意執行此優化程序？（請回覆「好」或「不要」）"
-        else:  # ariel
+        elif tone == "ariel":
             return f"親愛的{name}，大地的智慧告訴我，{you}需要「{module_name}」來滋養{you}的生命花園。\n\n{reason}\n\n讓我們一起種下這顆智慧的種子，好嗎？（請回覆「好」或「不要」）"
 
     def generate_error_message(self, tone: str = "guan_yu") -> str:
@@ -1312,7 +1312,7 @@ class LifeNumberAgent:
             return "親愛的，我需要你的基本資訊來理解你。\n\n請點擊下方按鈕填寫資料。"
         elif tone == "metatron":
             return "系統需要完整的數據來執行分析。\n\n請點擊下方按鈕輸入資料。"
-        else:  # ariel
+        elif tone == "ariel":
             return "親愛的，大地需要你的基本資訊來為你滋養豐盛。\n\n請點擊下方按鈕填寫資料。"
 
     def generate_rejection_response(
@@ -1355,7 +1355,7 @@ class LifeNumberAgent:
             return f"當然沒問題，親愛的{name}。請告訴我{you}想了解的關係層面：「生日數」、「核心生命靈數」、「九宮格」、「流年數」、「靈魂數」、「人格數」、「表達數」或「成熟數」，讓愛為{you}指引。"
         elif tone == "metatron":
             return f"收到，{name}。請直接指定{you}需要分析的模組：「生日數」、「核心生命靈數」、「九宮格」、「流年數」、「靈魂數」、「人格數」、「表達數」或「成熟數」，系統將執行相應程序。"
-        else:  # ariel
+        elif tone == "ariel":
             return f"好的，{name}。請告訴我{you}想滋養的生命面向：「生日數」、「核心生命靈數」、「九宮格」、「流年數」、「靈魂數」、「人格數」、「表達數」或「成熟數」，讓大地的智慧為{you}指引。"
 
     def generate_confirmation_retry(
@@ -1396,5 +1396,5 @@ class LifeNumberAgent:
             return (
                 f"系統無法解析{you}的指令。請輸入「好」或「不要」，以便執行後續程序。"
             )
-        else:  # ariel
+        elif tone == "ariel":
             return f"親愛的，我沒有收到清楚的訊息。請回覆「好」或「不要」，讓大自然的智慧繼續為我們指引。"
