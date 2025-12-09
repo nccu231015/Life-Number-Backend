@@ -41,7 +41,7 @@ steps:
       - '--timeout=120s'  # 請求超時時間
       - '--concurrency=80'  # 每個實例的並發請求數
       - '--set-env-vars=OPENAI_MODEL=gpt-4o,PROJECT_LOCALE=zh-TW'
-      - '--set-secrets=OPENAI_API_KEY=OPENAI_API_KEY:latest,REDIS_HOST=REDIS_HOST:latest,REDIS_PORT=REDIS_PORT:latest,REDIS_PASSWORD=REDIS_PASSWORD:latest,REDIS_USERNAME=REDIS_USERNAME:latest'
+      - '--set-secrets=OPENAI_API_KEY=OPENAI_API_KEY:latest,SUPABASE_URL=SUPABASE_URL:latest,SUPABASE_KEY=SUPABASE_KEY:latest,REDIS_HOST=REDIS_HOST:latest,REDIS_PORT=REDIS_PORT:latest,REDIS_PASSWORD=REDIS_PASSWORD:latest,REDIS_USERNAME=REDIS_USERNAME:latest'
 
 # 鏡像存儲位置
 images:

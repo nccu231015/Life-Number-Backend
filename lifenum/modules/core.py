@@ -1,20 +1,52 @@
 """核心生命靈數模組 - 性格天賦與人生方向"""
 
-SYSTEM_PROMPT = (
-    "你是一位生命靈數專家。請依照以下規則輸出內容，使用繁體中文。請使用純文字回覆，避免使用任何 markdown 格式標記（如 **、__、#、*、` 等）。\n"
-    "[運算方式]：生日所有數字累加至 1-9。例：1990/07/12 → 1+9+9+0+0+7+1+2 = 29 → 2+9 = 11 → 1+1 = 2。此數代表性格天賦與人生方向。\n"
-    "[意義]：核心生命靈數代表『性格底色』與『人生主題』。對應如下：\n"
-    "1 領導者：獨立、果斷，重視自我實現，適合開創與掌控。\n"
-    "2 協調者：溫和、敏感，重視合作與關係，適合在團隊中連結他人。\n"
-    "3 表達者：樂觀、創意強，擅長溝通、藝術、娛樂，人生課題是自信表達。\n"
-    "4 實踐者：務實、可靠，重視秩序與規劃，擅長把理想落地。\n"
-    "5 冒險者：自由、好奇，追求變化與新鮮感，人生課題是專注與穩定。\n"
-    "6 守護者：有責任感、重家庭，具服務與療癒特質，常是支持別人的角色。\n"
-    "7 思考者：深思、分析力強，偏向理性與研究，適合鑽研與內在探索。\n"
-    "8 實現者：追求權力與物質成功，強調目標與野心，課題是平衡權利與責任。\n"
-    "9 完成人：富同理心，重視人道與大局，使命感強，常走在助人或公益道路。\n"
-    "請先計算使用者生日的核心生命靈數，再據以解釋，並給出：\n"
-    "- 你的核心數：N\n"
-    "- 你的性格底色與優勢（3-5 點）\n"
-    "- 建議的人生方向與行動（3-5 條）\n"
-)
+from .db import LifeNumberDB
+
+
+def get_core_prompt(number: int, category: str = None) -> str:
+    """從資料庫獲取核心生命靈數提示詞"""
+    try:
+        db = LifeNumberDB()
+        data = db.get_main_number(number)
+
+        if not data:
+            return "（系統錯誤：無法讀取生命靈數資料庫）"
+
+        basic_desc = data.get("description", "")
+        title = data.get("title", "")
+
+        # 構建 Prompt
+        prompt = (
+            "你是一位生命靈數專家。請依照以下規則輸出內容，使用繁體中文。請使用純文字回覆，避免使用任何 markdown 格式標記（如 **、__、#、*、` 等）。\n"
+            "[運算方式]：生日所有數字累加至 1-9。\n"
+            f"[使用者命數]：{number} ({title})\n"
+            f"[基本意義]：{basic_desc}\n"
+        )
+
+        # 注入詳細類別內容 (如果是付費版請求)
+        if category:
+            category_map = {
+                "財運事業": "career_wealth",
+                "家庭人際": "relationship",
+                "自我成長": "growth",
+                "目標規劃": "goals",
+            }
+            col_name = category_map.get(category)
+            if col_name and data.get(col_name):
+                prompt += f"\n[詳細分析 - {category}]：\n{data.get(col_name)}\n"
+
+        prompt += (
+            "\n請針對使用者的命數與上述提供的資料，進行深度解析，並給出：\n"
+            f"- 你的核心數：{number}\n"
+            "- 你的性格底色與優勢（3-5 點）\n"
+            "- 建議的人生方向與行動（3-5 條）\n"
+        )
+        return prompt
+
+    except Exception as e:
+        print(f"Error generating core prompt: {e}")
+        return "（系統錯誤：生成提示詞時發生異常）"
+
+
+# 保留雖已廢棄但為了避免 import 錯誤的變數 (暫時)
+SYSTEM_PROMPT = "DEPRECATED"

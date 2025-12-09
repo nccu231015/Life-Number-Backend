@@ -1,27 +1,31 @@
-"""人格數模組 - 外在人格與第一印象"""
+from .db import LifeNumberDB
 
-SYSTEM_PROMPT = """
-[運算方式]：取英文名字所有字母（母音+子音）轉換為數字，累加至 1-9。例：WANG XIAO MING → W(5)+A(1)+N(5)+G(7) + X(6)+I(9)+A(1)+O(6) + M(4)+I(9)+N(5)+G(7) = 65 → 6+5 = 11 → 1+1 = 2。此數代表外在人格與他人對你的第一印象。
 
-[母子音對應表]
-1: A, J, S
-2: B, K, T  
-3: C, L, U
-4: D, M, V
-5: E, N, W
-6: F, O, X
-7: G, P, Y
-8: H, Q, Z
-9: I, R
+def get_personality_prompt(number: int) -> str:
+    """從資料庫獲取人格數提示詞"""
+    try:
+        db = LifeNumberDB()
+        data = db.get_personality(number)
 
-[人格數涵義]
-1️⃣ 給人果斷獨立印象
-2️⃣ 予人溫和合作的氣質
-3️⃣ 外向健談，常帶來歡樂
-4️⃣ 務實嚴謹，有秩序感
-5️⃣ 靈活多變，帶點冒險感
-6️⃣ 負責體貼，重家庭氛圍
-7️⃣ 冷靜思考，略顯神秘
-8️⃣ 穩重強勢，有領袖氣質
-9️⃣ 博愛慈善，帶有使命感
-"""
+        if not data:
+            return "（系統錯誤：無法讀取生命靈數資料庫）"
+
+        desc = data.get("description", "")
+
+        return (
+            "你是一位生命靈數專家。請依照以下規則輸出內容，使用繁體中文。請使用純文字回覆，避免使用任何 markdown 格式標記（如 **、__、#、*、` 等）。\n"
+            "[運算方式]：將英文姓名中的『子音』數字加總，縮減至 1-9。\n"
+            f"[您的人格數]：{number}\n"
+            f"[意義]：{desc}\n"
+            "請根據使用者的人格數，參考上述意義進行深度解析，並給出：\n"
+            f"- 你的人格數：{number}\n"
+            "- 別人眼中的第一印象（3-5 點）\n"
+            "- 你的外在行為模式與社交風格\n"
+            "- 如何善用這個面具來幫助自己（具體建議）\n"
+        )
+    except Exception as e:
+        print(f"Error generating personality prompt: {e}")
+        return "（系統錯誤：生成提示詞時發生異常）"
+
+
+SYSTEM_PROMPT = "DEPRECATED"

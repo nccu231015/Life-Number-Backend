@@ -8,9 +8,8 @@ import uuid
 
 from divination.agent import DivinationSession, DivinationAgent, DivinationState
 from divination.session_store import get_session_store
-from divination.modules.divination_data import (
-    THREE_CAST_INTERPRETATIONS,
-)
+from divination.modules.db import DivinationDB
+
 
 # ========== 語氣模板配置 ==========
 
@@ -435,8 +434,20 @@ def handle_chat(version: str):
             # 判斷組合類型
             combination_type = determine_combination_type(results)
 
-            # 取得基礎解讀
-            base_interpretation = THREE_CAST_INTERPRETATIONS[combination_type]
+            # 取得基礎解讀 (從 Supabase)
+            db = DivinationDB()
+            combination_data = db.get_combination_interpretation(combination_type)
+
+            if combination_data:
+                base_interpretation = combination_data.get("interpretation_text", "")
+            else:
+                # Fallback if DB fetch fails
+                print(
+                    f"Warning: Interpretation for {combination_type} not found in DB."
+                )
+                base_interpretation = (
+                    "神意已決，請誠心感受。（資料庫連線異常，無法讀取詳細解讀）"
+                )
 
             # 使用 AI 生成解讀
             agent = DivinationAgent()

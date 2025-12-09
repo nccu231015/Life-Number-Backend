@@ -8,9 +8,35 @@
 
 ### 單一代碼庫設計
 - ✅ 一個 `app.py` 統一處理所有請求
+- ✅ **資料庫驅動**：所有靈數資料從 Supabase 動態讀取
 - ✅ 配置驅動：所有差異在 `lifenum/version_config.py`
 - ✅ 語氣配置：`lifenum/tone_config.py`
 - ✅ 會話隔離：免費/付費完全獨立
+
+### 資料庫架構（Supabase）
+本系統使用 **Supabase (PostgreSQL)** 作為主資料庫，所有生命靈數、天使數字、占卜解讀的內容都儲存在資料庫中：
+
+**生命靈數相關資料表：**
+- `lifenum_main` - 核心生命靈數 (1-9) 的詳細資料
+- `lifenum_birthday` - 生日靈數解讀
+- `lifenum_personal_year` - 流年運勢
+- `lifenum_grid_lines` - 九宮格連線解讀
+- `lifenum_grid_missing` - 九宮格缺數解讀
+- `lifenum_soul` - 靈魂數
+- `lifenum_personality` - 人格數
+- `lifenum_expression` - 表達數
+- `lifenum_maturity` - 成熟數
+- `lifenum_challenge` - 挑戰數
+- `lifenum_karma` - 業力數
+
+**天使數字相關資料表：**
+- `angel_number_meanings` - 天使數字 (1111-9999) 的核心意義
+- `angel_number_basic_energy` - 單一數字 (0-9) 的基礎能量
+
+**占卜相關資料表：**
+- `divination_combinations` - 擲筊組合類型（10種組合：聖聖聖、聖聖陰等）
+- `divination_tone_greetings` - 不同神明的問候語與語氣配置
+
 
 ### 版本差異
 
@@ -79,6 +105,30 @@
 
 - `GET /health` - 健康檢查
 - `GET /` - API 資訊
+
+
+## 🔧 環境變數設定
+
+在專案根目錄建立 `.env` 檔案，包含以下必要環境變數：
+
+```bash
+# OpenAI API
+OPENAI_API_KEY=your_openai_api_key
+OPENAI_MODEL=gpt-4o
+
+# Supabase 資料庫
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your_supabase_anon_key
+
+# Redis (Session 管理)
+REDIS_HOST=your-redis-host
+REDIS_PORT=6379
+REDIS_PASSWORD=your-redis-password
+REDIS_USERNAME=default
+
+# 其他
+PROJECT_LOCALE=zh-TW
+```
 
 ## 🚀 啟動
 

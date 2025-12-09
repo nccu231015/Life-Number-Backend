@@ -57,7 +57,7 @@ if [ -f ".env" ]; then
     source .env
     
     # 檢查必要的環境變量
-    REQUIRED_VARS=("OPENAI_API_KEY" "REDIS_HOST" "REDIS_PORT" "REDIS_PASSWORD" "REDIS_USERNAME")
+    REQUIRED_VARS=("OPENAI_API_KEY" "SUPABASE_URL" "SUPABASE_KEY" "REDIS_HOST" "REDIS_PORT" "REDIS_PASSWORD" "REDIS_USERNAME")
     MISSING_VARS=0
     
     for VAR in "${REQUIRED_VARS[@]}"; do
@@ -78,6 +78,27 @@ if [ -f ".env" ]; then
     else
         echo "創建 OPENAI_API_KEY..."
         echo -n "${OPENAI_API_KEY}" | gcloud secrets create OPENAI_API_KEY --data-file=- --replication-policy="automatic"
+    fi
+    
+    # 創建或更新 Supabase 相關密鑰
+    echo "設置 Supabase 配置..."
+    
+    # SUPABASE_URL
+    if gcloud secrets describe SUPABASE_URL --project=${PROJECT_ID} &>/dev/null; then
+        echo "更新 SUPABASE_URL..."
+        echo -n "${SUPABASE_URL}" | gcloud secrets versions add SUPABASE_URL --data-file=-
+    else
+        echo "創建 SUPABASE_URL..."
+        echo -n "${SUPABASE_URL}" | gcloud secrets create SUPABASE_URL --data-file=- --replication-policy="automatic"
+    fi
+    
+    # SUPABASE_KEY
+    if gcloud secrets describe SUPABASE_KEY --project=${PROJECT_ID} &>/dev/null; then
+        echo "更新 SUPABASE_KEY..."
+        echo -n "${SUPABASE_KEY}" | gcloud secrets versions add SUPABASE_KEY --data-file=-
+    else
+        echo "創建 SUPABASE_KEY..."
+        echo -n "${SUPABASE_KEY}" | gcloud secrets create SUPABASE_KEY --data-file=- --replication-policy="automatic"
     fi
     
     # 創建或更新 Redis 相關密鑰
@@ -115,7 +136,7 @@ if [ -f ".env" ]; then
 else
     echo -e "${RED}❌ 找不到 .env 文件${NC}"
     echo "請確保根目錄下有 .env 文件，並包含以下變量："
-    echo "OPENAI_API_KEY, REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, REDIS_USERNAME"
+    echo "OPENAI_API_KEY, SUPABASE_URL, SUPABASE_KEY, REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, REDIS_USERNAME"
     exit 1
 fi
 
