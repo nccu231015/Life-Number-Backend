@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
 def normalize_birthdate(birthdate: str) -> str:
@@ -98,7 +98,7 @@ def extract_birth_month(birthdate: str) -> int:
     return 1
 
 
-def compute_personal_year_number(birthdate: str, year: int | None = None) -> int:
+def compute_personal_year_number(birthdate: str, year: Optional[int] = None) -> int:
     y = year or datetime.now().year
     year_sum = sum(int(ch) for ch in str(y))
     month = extract_birth_month(birthdate)
@@ -108,6 +108,7 @@ def compute_personal_year_number(birthdate: str, year: int | None = None) -> int
 
 
 # --- Nine-grid helpers ---
+
 
 def extract_all_digits(birthdate: str) -> List[int]:
     s = normalize_birthdate(birthdate)
@@ -145,6 +146,7 @@ def detect_present_lines(counts: Dict[int, int]) -> List[str]:
 
 def build_ascii_grid(counts: Dict[int, int]) -> str:
     """構建九宮格顯示，顯示各數字出現次數"""
+
     def cell(n: int) -> str:
         c = counts[n]
         return str(c) if c > 0 else "·"
@@ -157,24 +159,19 @@ def build_ascii_grid(counts: Dict[int, int]) -> str:
 
 # --- Soul Number helpers ---
 
+
 def extract_vowels(english_name: str) -> List[str]:
     """從英文名字中提取母音字母（A, E, I, O, U）"""
     vowels = []
     for char in english_name.upper():
-        if char in 'AEIOU':
+        if char in "AEIOU":
             vowels.append(char)
     return vowels
 
 
 def vowel_to_number(vowel: str) -> int:
     """將母音字母轉換為對應數字"""
-    vowel_map = {
-        'A': 1,
-        'E': 5,
-        'I': 9,
-        'O': 6,
-        'U': 3
-    }
+    vowel_map = {"A": 1, "E": 5, "I": 9, "O": 6, "U": 3}
     return vowel_map.get(vowel.upper(), 0)
 
 
@@ -189,29 +186,46 @@ def extract_all_letters(english_name: str) -> list[str]:
     """從英文名字中提取所有字母（母音和子音）用於人格數計算"""
     if not english_name:
         return []
-    
+
     letters = []
-    
+
     # 遍歷每個字符，提取所有英文字母
     for char in english_name.upper():
         if char.isalpha():
             letters.append(char)
-    
+
     return letters
 
 
 def consonant_to_number(consonant: str) -> int:
     """將母子音字母轉換為對應數字"""
     consonant_map = {
-        'A': 1, 'J': 1, 'S': 1,
-        'B': 2, 'K': 2, 'T': 2,
-        'C': 3, 'L': 3, 'U': 3,
-        'D': 4, 'M': 4, 'V': 4,
-        'E': 5, 'N': 5, 'W': 5,
-        'F': 6, 'O': 6, 'X': 6,
-        'G': 7, 'P': 7, 'Y': 7,
-        'H': 8, 'Q': 8, 'Z': 8,
-        'I': 9, 'R': 9
+        "A": 1,
+        "J": 1,
+        "S": 1,
+        "B": 2,
+        "K": 2,
+        "T": 2,
+        "C": 3,
+        "L": 3,
+        "U": 3,
+        "D": 4,
+        "M": 4,
+        "V": 4,
+        "E": 5,
+        "N": 5,
+        "W": 5,
+        "F": 6,
+        "O": 6,
+        "X": 6,
+        "G": 7,
+        "P": 7,
+        "Y": 7,
+        "H": 8,
+        "Q": 8,
+        "Z": 8,
+        "I": 9,
+        "R": 9,
     }
     return consonant_map.get(consonant.upper(), 0)
 
@@ -235,10 +249,10 @@ def compute_maturity_number(birthdate: str) -> int:
     # 計算核心生命靈數
     core_total = birthdate_to_digits_sum(birthdate)
     core_number = reduce_to_core_number(core_total)
-    
+
     # 計算生日數
     birthday_number = compute_birthday_number(birthdate)
-    
+
     # 成熟數 = 核心生命靈數 + 生日數
     maturity_total = core_number + birthday_number
     return reduce_to_core_number(maturity_total)
@@ -270,7 +284,7 @@ def extract_birth_year(birthdate: str) -> int:
 def compute_challenge_number(birthdate: str) -> int:
     """
     計算挑戰數：出生日月日數字計算差值
-    
+
     正確流程：
     1. 月先加到個位數（縮減到 1-9）
     2. 日先加到個位數（縮減到 1-9）
@@ -280,7 +294,7 @@ def compute_challenge_number(birthdate: str) -> int:
     6. 挑戰數 = |A - B|
     7. 如果挑戰數 = 0，則代表 9
     8. 如果挑戰數 > 9，縮減到個位數
-    
+
     例如1：2002/11/16
     月 = 1+1 = 2
     日 = 1+6 = 7
@@ -288,7 +302,7 @@ def compute_challenge_number(birthdate: str) -> int:
     A = 2 - 7 = -5
     B = 7 - 4 = 3
     挑戰數 = |-5 - 3| = 8
-    
+
     例如2：1990/10/10
     月 = 1+0 = 1
     日 = 1+0 = 1
@@ -301,30 +315,30 @@ def compute_challenge_number(birthdate: str) -> int:
     year = extract_birth_year(birthdate)
     month = extract_birth_month(birthdate)
     day = extract_birth_day(birthdate)
-    
+
     # 計算年月日的數字和，並縮減到個位數（1-9）
     year_sum = sum(int(ch) for ch in str(year))
     year_reduced = reduce_to_core_number(year_sum)
-    
+
     month_sum = sum(int(ch) for ch in str(month))
     month_reduced = reduce_to_core_number(month_sum)
-    
+
     day_sum = sum(int(ch) for ch in str(day))
     day_reduced = reduce_to_core_number(day_sum)
-    
+
     # A = 月個位數 - 日個位數
     a = month_reduced - day_reduced
-    
+
     # B = 日個位數 - 年個位數
     b = day_reduced - year_reduced
-    
+
     # 挑戰數 = |A - B|
     challenge = abs(a - b)
-    
+
     # 特殊規則：如果結果是 0，代表 9
     if challenge == 0:
         return 9
-    
+
     # 如果超過 9，縮減至 1-9
     return reduce_to_core_number(challenge)
 
@@ -332,20 +346,20 @@ def compute_challenge_number(birthdate: str) -> int:
 def compute_karma_number(birthdate: str) -> int:
     """
     計算業力數：優先檢查年份，再檢查年月日總和
-    
+
     規則：
     1. 先算年份數字加總，如果是 13、14、16、19，就是業力數（不再算年月日）
     2. 如果年份數字加總不是業力數，才算年月日加總
     3. 如果年月日加總是 13、14、16、19，就是業力數
     4. 如果都不是，返回 0（表示沒有業力數）
-    
+
     業力數意義：
     - 13: 業力輪 - 需要學習轉化負面能量、克服困難
     - 14: 自由與責任 - 需要學習在自由與責任之間找到平衡
     - 16: 業力塔 - 需要在人際關係中學習放下我執
     - 19: 業力輪的另一種形式 - 需要學習與他人合作，同時保持自我
     - 0: 沒有明顯的業力數
-    
+
     例如：
     - 1993/5/15 -> 年份: 1+9+9+3 = 22 (非業力數) -> 年月日: 1+9+9+3+5+1+5 = 33 (非業力數) -> 0
     - 1975/8/20 -> 年份: 1+9+7+5 = 22 (非業力數) -> 年月日: 1+9+7+5+8+2+0 = 32 (非業力數) -> 0
@@ -353,23 +367,23 @@ def compute_karma_number(birthdate: str) -> int:
     """
     # 提取年份
     year = extract_birth_year(birthdate)
-    
+
     # 計算年份數字加總
     year_digits = [int(ch) for ch in str(year)]
     year_sum = sum(year_digits)
-    
+
     # 業力數列表
     karma_numbers = [13, 14, 16, 19]
-    
+
     # 先檢查年份加總是否為業力數
     if year_sum in karma_numbers:
         return year_sum
-    
+
     # 如果年份不是業力數，再計算年月日加總
     s = normalize_birthdate(birthdate)
     all_digits = [int(ch) for ch in re.findall(r"\d", s)]
     total = sum(all_digits)
-    
+
     # 檢查年月日加總是否為業力數
     if total in karma_numbers:
         return total

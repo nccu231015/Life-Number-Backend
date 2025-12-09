@@ -990,7 +990,9 @@ class LifeNumberAgent:
 
     def extract_birthdate_with_ai(
         self, user_input: str, require_english_name: bool = True
-    ) -> tuple[str | None, str | None, str | None, str | None, str | None]:
+    ) -> tuple[
+        Optional[str], Optional[str], Optional[str], Optional[str], Optional[str]
+    ]:
         """
         使用AI從使用者輸入中提取姓名、性別、生日與英文名字（不限格式）
         返回：(姓名, 性別, 生日, 英文名字, 錯誤訊息)

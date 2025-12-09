@@ -4,16 +4,21 @@ Angel Number API Blueprint
 """
 
 from flask import Blueprint, request, jsonify
+from typing import Optional
 import uuid
 import re
 
-from angelnum.agent import AngelNumberAgent, AngelConversationSession, AngelConversationState
+from angelnum.agent import (
+    AngelNumberAgent,
+    AngelConversationSession,
+    AngelConversationState,
+)
 from angelnum.modules.angel_numbers import get_angel_number_meaning
 from shared.gpt_client import GPTClient
 from shared.session_store import BaseSessionStore
 
 # 創建 Blueprint
-angelnum_bp = Blueprint('angelnum', __name__, url_prefix='/angel')
+angelnum_bp = Blueprint("angelnum", __name__, url_prefix="/angel")
 
 # 創建 Session Store
 session_store = BaseSessionStore(module_name="angelnum")
@@ -25,7 +30,7 @@ agent = AngelNumberAgent()
 FREE_TONE_PROMPTS = {
     "friendly": "親切輕鬆,像朋友聊天一樣溫暖自然",
     "caring": "溫暖關懷,像靈性導師般深情陪伴",
-    "ritual": "莊重神聖,充滿儀式感與神性"
+    "ritual": "莊重神聖,充滿儀式感與神性",
 }
 
 # 付費版語氣配置（10種）- 參考 lifenum 的語氣風格
@@ -52,7 +57,10 @@ def get_tone_prompts(version: str = "free") -> dict:
 
 # ========== 工具函數 ==========
 
-def get_session_by_id(version: str, session_id: str) -> AngelConversationSession | None:
+
+def get_session_by_id(
+    version: str, session_id: str
+) -> Optional[AngelConversationSession]:
     """根據 session_id 從 Redis 獲取會話"""
     try:
         data = session_store.load(version, session_id)
@@ -64,7 +72,12 @@ def get_session_by_id(version: str, session_id: str) -> AngelConversationSession
         return None
 
 
-def save_and_return(version: str, session_id: str, conv_session: AngelConversationSession, response_data: dict):
+def save_and_return(
+    version: str,
+    session_id: str,
+    conv_session: AngelConversationSession,
+    response_data: dict,
+):
     """保存會話到 Redis 並返回 JSON 響應"""
     try:
         session_store.save(version, session_id, conv_session.to_dict())
@@ -85,7 +98,7 @@ def generate_greeting(tone: str, stage: str = "init") -> str:
             return "歡迎步入 天使數字殿堂 ✨\n\n當你多次看見相同的數字,\n\n那並非偶然,而是一道來自宇宙的密碼。\n\n每個數字皆蘊含神聖能量,\n\n象徵著靈魂階段的覺醒與啟示。\n\n請先告訴我你的姓名、性別與出生之日,\n\n隨後我將請你選擇那組反覆出現的數字 🕯️\n\n例如：王小明 男 1990/07/12"
         # 付費版默認問候（如果 tone 不在上述三種中）
         return "歡迎來到天使數字解讀空間。請告訴我您的姓名、性別與生日，讓我為您解讀宇宙的訊息。"
-    
+
     elif stage == "ask_angel_number":
         if tone == "friendly":
             return "接下來想請你告訴我一件小事：\n\n你最近最常看到的天使數字是什麼呢？💫\n\n像是「1111」、「3333」或是「5555」這樣的數字～\n\n別擔心沒有對錯,\n\n那只是宇宙在用數字的語言和你打招呼 🌈\n\n請告訴我你看到的數字吧！"
@@ -95,7 +108,7 @@ def generate_greeting(tone: str, stage: str = "init") -> str:
             return "在揭開符碼之前,我需要知道一件重要的事：\n\n近期反覆出現在你生命中的數字是什麼？\n\n那是一道宇宙的訊號,一段天使傳遞的能量序列。\n\n像是「1111」、「9999」這樣的重複數,\n\n它都象徵著你與宇宙能量正在共振。\n\n請輸入那組數字,\n\n讓我為你解讀這份來自天界的啟示 ✨"
         # 付費版通用問候
         return "請告訴我您最近反覆看到的天使數字，我將為您解讀其中的神聖含義。"
-    
+
     return ""
 
 
@@ -109,7 +122,7 @@ def generate_error_message(tone: str, error_type: str = "incomplete_info") -> st
         else:  # ritual
             return "天使數字之門尚未完全開啟。\n\n我需要更完整的召喚資訊,才能解讀數字的能量。\n\n請以以下格式重新輸入：\n✦ 王小明 男 1990/07/12\n✦ 李小華 女 1985/03/25\n\n當正確的姓名、性別與生日被輸入時,\n天使之光將再次流動,指引屬於您的數字之途 🔮"
         return "資料不完整，請提供姓名、性別與生日。"
-    
+
     elif error_type == "invalid_number":
         if tone == "friendly":
             return "咦？我好像沒看到數字耶 😅\n\n請直接輸入你看到的數字就好囉～\n\n像是「1111」、「2222」、「5555」這樣 ✨"
@@ -118,41 +131,47 @@ def generate_error_message(tone: str, error_type: str = "incomplete_info") -> st
         else:  # ritual
             return "請直接輸入數字序列,\n\n例如「7777」或「1111」🔮"
         return "請輸入有效的天使數字。"
-    
+
     return "抱歉,發生了一些錯誤,請重試。"
 
 
 # ========== 通用處理函數 ==========
+
 
 def handle_init_with_tone(version: str):
     """初始化對話並使用指定語氣"""
     data = request.json
     default_tone = "friendly" if version == "free" else "guan_yu"
     tone = data.get("tone", default_tone)
-    
+
     # 獲取語氣配置
     tone_prompts = get_tone_prompts(version)
-    
+
     # 驗證語氣
     if tone not in tone_prompts:
         return jsonify({"error": "無效的語氣選項"}), 400
-    
+
     # 創建新會話
     session_id = str(uuid.uuid4())
     conv_session = AngelConversationSession(session_id)
     conv_session.tone = tone
     conv_session.state = AngelConversationState.WAITING_BASIC_INFO
-    
+
     # 生成問候語
     response = generate_greeting(tone, "init")
     conv_session.add_message("assistant", response)
-    
-    return save_and_return(version, session_id, conv_session, {
-        "session_id": session_id,
-        "response": response,
-        "state": conv_session.state.value,
-        "requires_input": True
-    })
+
+    return save_and_return(
+        version,
+        session_id,
+        conv_session,
+        {
+            "session_id": session_id,
+            "response": response,
+            "state": conv_session.state.value,
+            "requires_input": True,
+        },
+    )
 
 
 def handle_chat(version: str):
@@ -160,89 +179,114 @@ def handle_chat(version: str):
     data = request.json
     session_id = data.get("session_id")
     user_input = data.get("message", "").strip()
-    
+
     # 驗證 session_id
     if not session_id:
-        return jsonify({
-            "error": "缺少 session_id",
-            "message": "請先調用 init_with_tone 初始化會話"
-        }), 400
-    
+        return jsonify(
+            {
+                "error": "缺少 session_id",
+                "message": "請先調用 init_with_tone 初始化會話",
+            }
+        ), 400
+
     # 獲取會話
     conv_session = get_session_by_id(version, session_id)
     if conv_session is None:
-        return jsonify({
-            "error": "會話不存在或已過期",
-            "message": "請重新調用 init_with_tone 初始化會話",
-            "session_id": session_id
-        }), 404
-    
+        return jsonify(
+            {
+                "error": "會話不存在或已過期",
+                "message": "請重新調用 init_with_tone 初始化會話",
+                "session_id": session_id,
+            }
+        ), 404
+
     # 記錄使用者輸入
     conv_session.add_message("user", user_input)
-    
+
     # 獲取語氣配置
     tone_prompts = get_tone_prompts(version)
-    
+
     # ========== 狀態機處理 ==========
-    
+
     # 1. WAITING_BASIC_INFO - 等待基本資訊
     if conv_session.state == AngelConversationState.WAITING_BASIC_INFO:
         # 使用 AI 解析基本資訊
         name, gender, birthdate, error_msg = agent.extract_birthdate_with_ai(user_input)
-        
+
         if error_msg:
             response = generate_error_message(conv_session.tone, "incomplete_info")
             conv_session.add_message("assistant", response)
-            return save_and_return(version, session_id, conv_session, {
-                "session_id": session_id,
-                "response": response,
-                "state": conv_session.state.value,
-                "requires_input": True
-            })
-        
+            return save_and_return(
+                version,
+                session_id,
+                conv_session,
+                {
+                    "session_id": session_id,
+                    "response": response,
+                    "state": conv_session.state.value,
+                    "requires_input": True,
+                },
+            )
+
         # 保存基本資訊
         conv_session.user_name = name
         conv_session.user_gender = gender
         conv_session.birthdate = birthdate
-        
+
         # 詢問天使數字
-        greeting_part = f"{name},你好呀～我這邊已經收到你的資料囉 ✨\n\n" if conv_session.tone == "friendly" else \
-                       f"{name},感謝你分享你的資料 🌙\n\n" if conv_session.tone == "caring" else \
-                       f"{name},感謝你的回應 🕯️\n\n"
-        
+        greeting_part = (
+            f"{name},你好呀～我這邊已經收到你的資料囉 ✨\n\n"
+            if conv_session.tone == "friendly"
+            else f"{name},感謝你分享你的資料 🌙\n\n"
+            if conv_session.tone == "caring"
+            else f"{name},感謝你的回應 🕯️\n\n"
+        )
+
         # 如果是付費版且語氣不是免費的三種，使用通用開頭
         if version == "paid" and conv_session.tone not in FREE_TONE_PROMPTS:
             greeting_part = f"{name}，已收到您的資料。\n\n"
-            
+
         angel_number_prompt = generate_greeting(conv_session.tone, "ask_angel_number")
         response = greeting_part + angel_number_prompt
-        
+
         conv_session.state = AngelConversationState.WAITING_ANGEL_NUMBER
         conv_session.add_message("assistant", response)
-        
-        return save_and_return(version, session_id, conv_session, {
-            "session_id": session_id,
-            "response": response,
-            "state": conv_session.state.value,
-            "show_angel_number_selector": (version == "free"),  # 免費版顯示選擇器，付費版輸入文字
-            "requires_input": True
-        })
-    
-    # 2. WAITING_ANGEL_NUMBER - 等待天使數字
-    elif conv_session.state == AngelConversationState.WAITING_ANGEL_NUMBER:
-        # 提取數字
-        angel_number = re.sub(r'[^\d]', '', user_input.strip())
-        
-        if not angel_number or len(angel_number) == 0:
-            response = generate_error_message(conv_session.tone, "invalid_number")
-            conv_session.add_message("assistant", response)
-            return save_and_return(version, session_id, conv_session, {
+
+        return save_and_return(
+            version,
+            session_id,
+            conv_session,
+            {
                 "session_id": session_id,
                 "response": response,
                 "state": conv_session.state.value,
-                "requires_input": True
-            })
-        
+                "show_angel_number_selector": (
+                    version == "free"
+                ),  # 免費版顯示選擇器，付費版輸入文字
+                "requires_input": True,
+            },
+        )
+
+    # 2. WAITING_ANGEL_NUMBER - 等待天使數字
+    elif conv_session.state == AngelConversationState.WAITING_ANGEL_NUMBER:
+        # 提取數字
+        angel_number = re.sub(r"[^\d]", "", user_input.strip())
+
+        if not angel_number or len(angel_number) == 0:
+            response = generate_error_message(conv_session.tone, "invalid_number")
+            conv_session.add_message("assistant", response)
+            return save_and_return(
+                version,
+                session_id,
+                conv_session,
+                {
+                    "session_id": session_id,
+                    "response": response,
+                    "state": conv_session.state.value,
+                    "requires_input": True,
+                },
+            )
+
         # 付費版：檢查數字長度限制（4位數以內）
         if version == "paid" and len(angel_number) > 4:
             if conv_session.tone == "friendly":
@@ -251,27 +295,36 @@ def handle_chat(version: str):
                 response = f"親愛的,你輸入的「{angel_number}」超過了 4 位數 🌙\n\n讓我們專注在更精煉的數字上吧～\n\n請輸入 4 位數以內的天使數字,像是「444」或「1212」💫"
             else:  # ritual
                 response = f"數字「{angel_number}」超出了天使數字的規範。\n\n請輸入 4 位數以內的數字序列 🔮"
-            
+
             conv_session.add_message("assistant", response)
-            return save_and_return(version, session_id, conv_session, {
-                "session_id": session_id,
-                "response": response,
-                "state": conv_session.state.value,
-                "requires_input": True
-            })
-        
+            return save_and_return(
+                version,
+                session_id,
+                conv_session,
+                {
+                    "session_id": session_id,
+                    "response": response,
+                    "state": conv_session.state.value,
+                    "requires_input": True,
+                },
+            )
+
         # 保存天使數字
         conv_session.angel_number = angel_number
-        
+
         # 取得天使數字的核心意義
         # 付費版使用智能分析，免費版使用固定意義
-        use_intelligent = (version == "paid")
-        angel_data = get_angel_number_meaning(angel_number, use_intelligent_analysis=use_intelligent)
+        use_intelligent = version == "paid"
+        angel_data = get_angel_number_meaning(
+            angel_number, use_intelligent_analysis=use_intelligent
+        )
         meanings_text = "\n".join(angel_data["meanings"])
-        
+
         # 根據語氣設定 system prompt
-        tone_description = tone_prompts.get(conv_session.tone, tone_prompts.get("guan_yu", "friendly"))
-        
+        tone_description = tone_prompts.get(
+            conv_session.tone, tone_prompts.get("guan_yu", "friendly")
+        )
+
         # 構建 Prompt
         system_prompt = f"""你是一位專業的天使數字解讀師。
 
@@ -293,57 +346,71 @@ def handle_chat(version: str):
 【格式要求】
 - 不使用任何 markdown 格式標記（如 **、##、- 等）
 - 使用純文字和換行組織內容
-- 回應長度控制在 {'400-500' if version == 'paid' else '300-400'} 字左右
+- 回應長度控制在 {"400-500" if version == "paid" else "300-400"} 字左右
 - 要有溫度、有深度、有啟發性
 
 請記住：你不只是在解釋數字,更是在傳遞來自宇宙的愛與指引。"""
-        
+
         # 根據語氣設定問候語
         if conv_session.tone == "friendly":
-            greeting = f"{conv_session.user_name},我看到了你的天使數字 {angel_number}！✨\n\n"
+            greeting = (
+                f"{conv_session.user_name},我看到了你的天使數字 {angel_number}！✨\n\n"
+            )
         elif conv_session.tone == "caring":
             greeting = f"親愛的 {conv_session.user_name},讓我為你解讀天使數字 {angel_number} 🌙\n\n"
         elif conv_session.tone == "ritual":
             greeting = f"{conv_session.user_name},{angel_number} 的神聖啟示如下 🕯️\n\n"
         else:
             greeting = f"{conv_session.user_name}，關於天使數字 {angel_number} 的解讀如下：\n\n"
-        
+
         user_prompt = f"使用者的姓名是 {conv_session.user_name},他/她最近反覆看到天使數字 {angel_number}。\n\n請根據這個數字的核心意義,為 {conv_session.user_name} 提供完整、溫暖且具啟發性的解析,幫助他/她理解宇宙想要傳達的訊息。"
-        
+
         try:
             client = GPTClient()
-            print(f"\n{'='*60}")
+            print(f"\n{'=' * 60}")
             print(f"[DEBUG] 解析天使數字 ({version})")
             print(f"[DEBUG] Angel Number: {angel_number}")
             print(f"[DEBUG] Pattern: {angel_data.get('pattern', 'unknown')}")
             print(f"[DEBUG] User: {conv_session.user_name}")
             print(f"[DEBUG] Tone: {conv_session.tone}")
-            print(f"{'='*60}\n")
-            
+            print(f"{'=' * 60}\n")
+
             # 付費版使用 higher temperature for creativity
             temp = 1.0 if version == "paid" else 0.7
             max_tok = 800 if version == "paid" else 500
-            
-            final_response = client.ask(system_prompt, user_prompt, temperature=temp, max_tokens=max_tok)
-            
+
+            final_response = client.ask(
+                system_prompt, user_prompt, temperature=temp, max_tokens=max_tok
+            )
+
             # 清理 markdown 格式標記
-            final_response = final_response.replace("**", "").replace("__", "").replace("##", "").replace("###", "")
-            
+            final_response = (
+                final_response.replace("**", "")
+                .replace("__", "")
+                .replace("##", "")
+                .replace("###", "")
+            )
+
             # 加上問候語
             final_response = greeting + final_response
-            
+
             if version == "free":
                 # 免費版：直接結束
                 conv_session.state = AngelConversationState.COMPLETED
                 conv_session.add_message("assistant", final_response)
-                
-                return save_and_return(version, session_id, conv_session, {
-                    "session_id": session_id,
-                    "response": final_response,
-                    "state": conv_session.state.value,
-                    "angel_number": angel_number,
-                    "requires_input": False
-                })
+
+                return save_and_return(
+                    version,
+                    session_id,
+                    conv_session,
+                    {
+                        "session_id": session_id,
+                        "response": final_response,
+                        "state": conv_session.state.value,
+                        "angel_number": angel_number,
+                        "requires_input": False,
+                    },
+                )
             else:
                 # 付費版：添加詢問語句並進入 ASKING_FOR_QUESTION 狀態
                 if conv_session.tone == "friendly":
@@ -353,48 +420,73 @@ def handle_chat(version: str):
                 elif conv_session.tone == "ritual":
                     ask_question = "\n\n若您對此數字的啟示有任何疑問,\n\n或欲深入探究其中奧義,\n\n請隨時提問,我將為您揭示更深層的訊息 🕯️"
                 else:
-                    ask_question = "\n\n若您對此解析有任何疑問，或想深入探討，請隨時提問。"
-                
+                    ask_question = (
+                        "\n\n若您對此解析有任何疑問，或想深入探討，請隨時提問。"
+                    )
+
                 final_response += ask_question
-                
+
                 conv_session.state = AngelConversationState.ASKING_FOR_QUESTION
                 conv_session.add_message("assistant", final_response)
-                
-                return save_and_return(version, session_id, conv_session, {
-                    "session_id": session_id,
-                    "response": final_response,
-                    "state": conv_session.state.value,
-                    "angel_number": angel_number,
-                    "pattern": angel_data.get("pattern", "general"),
-                    "requires_input": True
-                })
-            
+
+                return save_and_return(
+                    version,
+                    session_id,
+                    conv_session,
+                    {
+                        "session_id": session_id,
+                        "response": final_response,
+                        "state": conv_session.state.value,
+                        "angel_number": angel_number,
+                        "pattern": angel_data.get("pattern", "general"),
+                        "requires_input": True,
+                    },
+                )
+
         except Exception as e:
             print(f"[ERROR] 解析天使數字錯誤: {e}")
             import traceback
+
             traceback.print_exc()
-            
+
             error_response = f"抱歉,解析過程發生錯誤：{str(e)}"
             conv_session.add_message("assistant", error_response)
-            return save_and_return(version, session_id, conv_session, {
-                "session_id": session_id,
-                "response": error_response,
-                "state": conv_session.state.value,
-                "requires_input": False
-            })
+            return save_and_return(
+                version,
+                session_id,
+                conv_session,
+                {
+                    "session_id": session_id,
+                    "response": error_response,
+                    "state": conv_session.state.value,
+                    "requires_input": False,
+                },
+            )
 
     # 3. ASKING_FOR_QUESTION - 詢問是否有問題（付費版專屬）
     elif conv_session.state == AngelConversationState.ASKING_FOR_QUESTION:
         # 檢查使用者是否有問題
         user_input_lower = user_input.lower().strip()
-        no_question_keywords = ["沒有", "没有", "不用", "沒了", "没了", "好了", "謝謝", "谢谢", "感恩", "不需要", "不用了"]
-        
+        no_question_keywords = [
+            "沒有",
+            "没有",
+            "不用",
+            "沒了",
+            "没了",
+            "好了",
+            "謝謝",
+            "谢谢",
+            "感恩",
+            "不需要",
+            "不用了",
+        ]
+
         has_question = True
         for keyword in no_question_keywords:
             if keyword in user_input_lower:
                 has_question = False
                 break
-        
+
         if not has_question or len(user_input.strip()) < 2:
             # 使用者沒有問題,結束對話
             if conv_session.tone == "friendly":
@@ -405,19 +497,24 @@ def handle_chat(version: str):
                 response = "天使數字的啟示已完整揭示 ✨\n\n願您領受這份來自天界的智慧,踏上光明之途 🕯️\n\n若有其他數字欲解讀,請隨時再來"
             else:
                 response = "感謝您的信任。願天使的指引為您帶來光明。再會。"
-            
+
             conv_session.state = AngelConversationState.COMPLETED
             conv_session.add_message("assistant", response)
-            return save_and_return(version, session_id, conv_session, {
-                "session_id": session_id,
-                "response": response,
-                "state": conv_session.state.value,
-                "requires_input": False
-            })
-        
+            return save_and_return(
+                version,
+                session_id,
+                conv_session,
+                {
+                    "session_id": session_id,
+                    "response": response,
+                    "state": conv_session.state.value,
+                    "requires_input": False,
+                },
+            )
+
         # 使用者有問題,進入持續對話狀態
         conv_session.state = AngelConversationState.CONVERSATION
-        
+
         # 進入 CONVERSATION 邏輯（直接往下執行）
         pass
 
@@ -425,14 +522,24 @@ def handle_chat(version: str):
     if conv_session.state == AngelConversationState.CONVERSATION:
         # 檢查是否要結束對話
         user_input_lower = user_input.lower().strip()
-        end_keywords = ["謝謝", "谢谢", "感恩", "結束", "结束", "再見", "再见", "拜拜", "bye"]
-        
+        end_keywords = [
+            "謝謝",
+            "谢谢",
+            "感恩",
+            "結束",
+            "结束",
+            "再見",
+            "再见",
+            "拜拜",
+            "bye",
+        ]
+
         wants_to_end = False
         for keyword in end_keywords:
             if keyword in user_input_lower and len(user_input) < 10:
                 wants_to_end = True
                 break
-        
+
         if wants_to_end:
             # 結束對話
             if conv_session.tone == "friendly":
@@ -440,34 +547,56 @@ def handle_chat(version: str):
             elif conv_session.tone == "caring":
                 response = "親愛的,很榮幸能陪伴你這段探索之旅 🌙\n\n願天使的祝福常伴你左右 💕\n\n記得,宇宙一直都在支持著你 🕊️"
             elif conv_session.tone == "ritual":
-                response = "感謝您的信任與聆聽 ✨\n\n願天使的光芒永遠照耀您的道路 🕯️\n\n再會"
+                response = (
+                    "感謝您的信任與聆聽 ✨\n\n願天使的光芒永遠照耀您的道路 🕯️\n\n再會"
+                )
             else:
                 response = "感謝您的信任與聆聽。願天使的光芒永遠照耀您的道路。再會。"
-            
+
             conv_session.state = AngelConversationState.COMPLETED
             conv_session.add_message("assistant", response)
-            return save_and_return(version, session_id, conv_session, {
-                "session_id": session_id,
-                "response": response,
-                "state": conv_session.state.value,
-                "requires_input": False
-            })
-        
+            return save_and_return(
+                version,
+                session_id,
+                conv_session,
+                {
+                    "session_id": session_id,
+                    "response": response,
+                    "state": conv_session.state.value,
+                    "requires_input": False,
+                },
+            )
+
         # 繼續回答問題
         angel_number = conv_session.angel_number
         name = conv_session.user_name
-        
+
         # 重新獲取意義用於上下文
-        use_intelligent = (version == "paid")
-        angel_data = get_angel_number_meaning(angel_number, use_intelligent_analysis=use_intelligent)
+        use_intelligent = version == "paid"
+        angel_data = get_angel_number_meaning(
+            angel_number, use_intelligent_analysis=use_intelligent
+        )
         meanings_text = "\n".join(angel_data["meanings"])
-        
-        tone_description = tone_prompts.get(conv_session.tone, tone_prompts.get("guan_yu", "friendly"))
-        
+
+        tone_description = tone_prompts.get(
+            conv_session.tone, tone_prompts.get("guan_yu", "friendly")
+        )
+
         # 構建對話歷史摘要（取最近的3-4輪對話）
-        recent_history = conv_session.conversation_history[-6:] if len(conv_session.conversation_history) > 6 else conv_session.conversation_history
-        history_text = "\n".join([f"{msg['role']}: {msg['content'][:100]}..." if len(msg['content']) > 100 else f"{msg['role']}: {msg['content']}" for msg in recent_history])
-        
+        recent_history = (
+            conv_session.conversation_history[-6:]
+            if len(conv_session.conversation_history) > 6
+            else conv_session.conversation_history
+        )
+        history_text = "\n".join(
+            [
+                f"{msg['role']}: {msg['content'][:100]}..."
+                if len(msg["content"]) > 100
+                else f"{msg['role']}: {msg['content']}"
+                for msg in recent_history
+            ]
+        )
+
         system_prompt = f"""你是一位專業的天使數字解讀師,正在與使用者 {name} 進行深度對話。
 
 天使數字 {angel_number} 的核心意義：
@@ -488,16 +617,23 @@ def handle_chat(version: str):
 5. 回應長度控制在 350-500 字,請務必完整表達完整的意思
 
 請針對使用者的最新問題,提供有深度的回答。"""
-        
+
         user_prompt = f"使用者的最新問題：{user_input}\n\n請根據對話背景和天使數字的意義,提供深度且連貫的回答。"
-        
+
         try:
             client = GPTClient()
-            response_text = client.ask(system_prompt, user_prompt, temperature=1.0, max_tokens=800)
-            
+            response_text = client.ask(
+                system_prompt, user_prompt, temperature=1.0, max_tokens=800
+            )
+
             # 清理格式
-            response_text = response_text.replace("**", "").replace("__", "").replace("##", "").replace("###", "")
-            
+            response_text = (
+                response_text.replace("**", "")
+                .replace("__", "")
+                .replace("##", "")
+                .replace("###", "")
+            )
+
             # 添加繼續詢問的提示
             if conv_session.tone == "friendly":
                 continue_prompt = "\n\n還有其他想了解的嗎？💫"
@@ -507,27 +643,37 @@ def handle_chat(version: str):
                 continue_prompt = "\n\n若有其他疑問,請繼續提問 🕯️"
             else:
                 continue_prompt = "\n\n若有其他疑問，請繼續提問。"
-            
+
             response_text += continue_prompt
-            
+
             conv_session.add_message("assistant", response_text)
-            return save_and_return(version, session_id, conv_session, {
-                "session_id": session_id,
-                "response": response_text,
-                "state": conv_session.state.value,
-                "requires_input": True
-            })
-            
+            return save_and_return(
+                version,
+                session_id,
+                conv_session,
+                {
+                    "session_id": session_id,
+                    "response": response_text,
+                    "state": conv_session.state.value,
+                    "requires_input": True,
+                },
+            )
+
         except Exception as e:
             print(f"[ERROR] 對話回答錯誤: {e}")
             error_response = f"抱歉,回答過程發生錯誤：{str(e)}"
             conv_session.add_message("assistant", error_response)
-            return save_and_return(version, session_id, conv_session, {
-                "session_id": session_id,
-                "response": error_response,
-                "state": conv_session.state.value,
-                "requires_input": True
-            })
+            return save_and_return(
+                version,
+                session_id,
+                conv_session,
+                {
+                    "session_id": session_id,
+                    "response": error_response,
+                    "state": conv_session.state.value,
+                    "requires_input": True,
+                },
+            )
 
     # 5. COMPLETED - 已完成
     elif conv_session.state == AngelConversationState.COMPLETED:
@@ -540,59 +686,75 @@ def handle_chat(version: str):
             response = "天使數字的啟示已完整揭示。\n\n若欲解讀其他數字序列,請點擊「🔄 重新開始」按鈕 🕯️"
         else:
             response = "解讀已完成。若欲解讀其他數字，請點擊重新開始。"
-        
+
         conv_session.add_message("assistant", response)
-        return save_and_return(version, session_id, conv_session, {
-            "session_id": session_id,
-            "response": response,
-            "state": conv_session.state.value,
-            "requires_input": False
-        })
-    
+        return save_and_return(
+            version,
+            session_id,
+            conv_session,
+            {
+                "session_id": session_id,
+                "response": response,
+                "state": conv_session.state.value,
+                "requires_input": False,
+            },
+        )
+
     # 預設回應
-    return save_and_return(version, session_id, conv_session, {
-        "session_id": session_id,
-        "response": "抱歉,系統發生錯誤。請重新開始對話。",
-        "state": conv_session.state.value,
-        "requires_input": False
-    })
+    return save_and_return(
+        version,
+        session_id,
+        conv_session,
+        {
+            "session_id": session_id,
+            "response": "抱歉,系統發生錯誤。請重新開始對話。",
+            "state": conv_session.state.value,
+            "requires_input": False,
+        },
+    )
 
 
 def handle_reset(version: str):
     """重置會話"""
     data = request.json
     session_id = data.get("session_id")
-    
+
     if session_id:
         session_store.delete(version, session_id)
-    
+
     return jsonify({"success": True})
 
 
 # ========== API 端點 ==========
 
+
 # 免費版路由
-@angelnum_bp.route('/free/api/init_with_tone', methods=['POST'])
+@angelnum_bp.route("/free/api/init_with_tone", methods=["POST"])
 def free_init():
-    return handle_init_with_tone('free')
+    return handle_init_with_tone("free")
 
-@angelnum_bp.route('/free/api/chat', methods=['POST'])
+
+@angelnum_bp.route("/free/api/chat", methods=["POST"])
 def free_chat():
-    return handle_chat('free')
+    return handle_chat("free")
 
-@angelnum_bp.route('/free/api/reset', methods=['POST'])
+
+@angelnum_bp.route("/free/api/reset", methods=["POST"])
 def free_reset():
-    return handle_reset('free')
+    return handle_reset("free")
+
 
 # 付費版路由
-@angelnum_bp.route('/paid/api/init_with_tone', methods=['POST'])
+@angelnum_bp.route("/paid/api/init_with_tone", methods=["POST"])
 def paid_init():
-    return handle_init_with_tone('paid')
+    return handle_init_with_tone("paid")
 
-@angelnum_bp.route('/paid/api/chat', methods=['POST'])
+
+@angelnum_bp.route("/paid/api/chat", methods=["POST"])
 def paid_chat():
-    return handle_chat('paid')
+    return handle_chat("paid")
 
-@angelnum_bp.route('/paid/api/reset', methods=['POST'])
+
+@angelnum_bp.route("/paid/api/reset", methods=["POST"])
 def paid_reset():
-    return handle_reset('paid')
+    return handle_reset("paid")
