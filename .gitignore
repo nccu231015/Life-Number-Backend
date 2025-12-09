@@ -56,6 +56,7 @@ nohup.out
 test_lifenum_flow.py
 test_angel_flow.py
 test_divination_flow.py
+test_auspicious_flow.py
 test_deployment.py
 
 # Temporary files

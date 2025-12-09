@@ -8,6 +8,7 @@
 1. **生命靈數 (Life Number)** - 完整的生命靈數計算與解讀系統
 2. **天使數字 (Angel Number)** - 天使數字訊息解讀
 3. **神諭占卜 (Divination)** - 擲筊占卜與神明指引
+4. **黃道吉日 (Auspicious Date)** - 黃曆查詢與吉日推薦
 
 ### 💾 資料庫架構
 
@@ -23,6 +24,7 @@
 - 生命靈數：11 個資料表（main, birthday, year, grid, soul, personality, expression, maturity, challenge, karma, grid_missing）
 - 天使數字：2 個資料表（meanings, basic_energy）
 - 占卜系統：2 個資料表（combinations, tone_greetings）
+- 黃道吉日：1 個資料表（auspicious_calendar - 月份黃曆資料）
 
 I/O 規格文檔
 
@@ -120,6 +122,10 @@ http://localhost:8080
 | `/divination/paid/api/init_with_tone` | POST | 擲筊 - 付費版初始化 |
 | `/divination/paid/api/chat` | POST | 擲筊 - 付費版對話 |
 | `/divination/paid/api/reset` | POST | 擲筊 - 付費版重置 |
+| **黃道吉日 (Auspicious Date)** |
+| `/auspicious/free/api/init_with_tone` | POST | 黃道吉日 - 免費版初始化 |
+| `/auspicious/free/api/chat` | POST | 黃道吉日 - 免費版對話 |
+| `/auspicious/free/api/reset` | POST | 黃道吉日 - 免費版重置 |
 
 ---
 
@@ -326,6 +332,136 @@ http://localhost:8080
 
 ---
 
+## 6️⃣ 黃道吉日 API (Auspicious Date)
+
+黃道吉日模組提供基於傳統黃曆的吉日查詢服務。
+
+### 🌟 版本差異
+
+| 功能 | 免費版 | 付費版 |
+|------|--------|--------|
+| **語氣選擇** | 3 種 (friendly, caring, ritual) | 待規劃 |
+| **分類查詢** | 5 種分類（生活日常、家庭居所、感情人際、喜慶大事、工作事業） | 待規劃 |
+| **輸入方式** | 按鈕選擇 + 文字輸入 | 待規劃 |
+| **解讀方式** | 基於黃曆「宜」「忌」欄位 | 待規劃：深度解讀 + 多日推薦 |
+| **對話深度** | 單次查詢即結束 | 待規劃 |
+
+### 📡 端點說明
+
+####初始化對話
+`POST /auspicious/{version}/api/init_with_tone`
+
+**Request:**
+```jsonc
+{
+  "tone": "string" // friendly, caring, ritual
+}
+```
+
+**Response:**
+```jsonc
+{
+  "session_id": "uuid",
+  "response": "問候語",
+  "state": "waiting_basic_info"
+}
+```
+
+#### 對話互動
+`POST /auspicious/{version}/api/chat`
+
+**Request - 階段 1（提交基本資訊）:**
+```jsonc
+{
+  "session_id": "uuid",
+  "message": "王小明 男 1990/07/12"
+}
+```
+
+**Response:**
+```jsonc
+{
+  "session_id": "uuid",
+  "response": "好的！接下來請選擇你想查詢的分類，並選擇一個日期...",
+  "state": "waiting_category_and_date",
+  "categories": {
+    "daily_life": {...},
+    "family_home": {...},
+    "relationship": {...},
+    "celebration": {...},
+    "work_career": {...}
+  }
+}
+```
+
+**Request - 階段 2（選擇分類和日期）:**
+
+方式一：前端按鈕直接傳遞
+```jsonc
+{
+  "session_id": "uuid",
+  "category": "family_home",
+  "selected_date": "2025-12-15"
+}
+```
+
+方式二：文字輸入
+```jsonc
+{
+  "session_id": "uuid",
+  "message": "家庭居所，2025-12-15"
+}
+```
+
+**分類對應：**
+| Key | 中文名稱 | 黃曆對應 |
+|-----|---------|---------|
+| `daily_life` | 生活日常 | 出行、出火、捕捉、畋獵、取魚、結網、沐浴、會親友等 |
+| `family_home` | 家庭居所` | 入宅、安床、作灶、動土、上樑、裁衣、破屋壞垣 |
+| `relationship` | 感情人際 | 納采、嫁娶、冠笄 |
+| `celebration` | 喜慶大事 | 祭祀、祈福、開光、設醮、齋醮、安香 |
+| `work_career` | 工作事業 | 開市、交車 |
+
+**Response:**
+```jsonc
+{
+  "session_id": "uuid",
+  "response": "好的！你選擇了「家庭居所」，日期是「2025-12-15」...",
+  "state": "waiting_specific_question",
+  "category": "family_home",
+  "selected_date": "2025-12-15"
+}
+```
+
+**Request - 階段 3（描述具體事項）:**
+```jsonc
+{
+  "session_id": "uuid",
+  "message": "我想搬家到新家"
+}
+```
+
+**Response:**
+```jsonc
+{
+  "session_id": "uuid",
+  "response": "收到！我會為你查詢「我想搬家到新家」在「2025-12-15」這天是否適合...",
+  "state": "completed",
+  "specific_question": "我想搬家到新家"
+}
+```
+
+### 🔄 對話流程
+
+#### 免費版流程
+1. **初始化**：選擇語氣
+2. **基本資訊**：輸入姓名、性別、生日
+3. **選擇分類和日期**：從 5 個分類中選擇 + 選擇具體日期
+4. **描述事項**：描述具體想做的事情
+5. **查詢結果**：（待實作）系統查詢黃曆並返回是否適合
+
+---
+
 ## 1️⃣ 初始化對話
 
 ### **POST** `/life/{version}/api/init_with_tone`
@@ -373,6 +509,10 @@ http://localhost:8080
   - `jiutian` (九天娘娘)
   - `guanyin_health` (觀音菩薩-健康)
   - `fude` (福德正神)
+
+**4. 黃道吉日 (Auspicious Date)**
+- **免費版**: `friendly` (親切), `caring` (貼心), `ritual` (儀式)
+- **付費版**: 待規劃
 
 #### Response
 ```jsonc
@@ -447,7 +587,13 @@ curl -X POST http://localhost:8080/life/free/api/init_with_tone \
 - `continue_selection` - 繼續選項
 - `completed` - 已完成
 
-> 📝 **重要**：`core_category_selection` 狀態只會在付費版選擇 `core` 模組時出現。其他模組（birthday, year, grid, soul, personality, expression, maturity, challenge, karma）不會進入此狀態，會直接執行模組分析。
+**黃道吉日專屬：**
+- `waiting_category_and_date` - 等待分類與日期選擇
+- `waiting_specific_question` - 等待具體問題
+- `providing_dates` - 提供吉日建議
+
+> 📝 **重要**：`core_category_selection` 狀態只會在付費版選擇 `core` 模組時出現。
+其他模組（birthday, year, grid, soul, personality, expression, maturity, challenge, karma）不會進入此狀態，會直接執行模組分析。
 
 ---
 
@@ -1415,7 +1561,7 @@ curl -X POST http://localhost:8080/angel/free/api/chat \
 
 ## 📌 版本資訊
 - **API Version**: 1.0.0
-- **Last Updated**: 2025-11-25
+- **Last Updated**: 2025-12-09
 - **部署平台**: GCP Cloud Run
 - **文檔維護**: 每次 API 變更時同步更新
 

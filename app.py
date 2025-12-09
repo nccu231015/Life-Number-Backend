@@ -7,12 +7,14 @@ try:
     from lifenum_api import lifenum_bp
     from angelnum_api import angelnum_bp
     from divination_api import divination_bp
+    from auspicious_api import auspicious_bp
 except ImportError as e:
     print(f"Warning: Failed to import blueprints: {e}")
     # 在測試環境中可能會失敗，這裡做簡單處理
     lifenum_bp = None
     angelnum_bp = None
     divination_bp = None
+    auspicious_bp = None
 
 
 def create_app():
@@ -34,6 +36,10 @@ def create_app():
         app.register_blueprint(divination_bp)
         print("Registered Blueprint: divination (prefix: /divination)")
 
+    if auspicious_bp:
+        app.register_blueprint(auspicious_bp)
+        print("Registered Blueprint: auspicious (prefix: /auspicious)")
+
     @app.route("/", methods=["GET", "POST"])
     def index():
         return jsonify(
@@ -44,6 +50,7 @@ def create_app():
                     "lifenum": bool(lifenum_bp),
                     "angelnum": bool(angelnum_bp),
                     "divination": bool(divination_bp),
+                    "auspicious": bool(auspicious_bp),
                 },
             }
         )
