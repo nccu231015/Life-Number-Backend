@@ -374,7 +374,7 @@ http://localhost:8080
 ```jsonc
 {
   "session_id": "uuid",
-  "message": "王小明 男 1990/07/12"
+  "message": "王小明 男 1990/07/12 屬馬"
 }
 ```
 
@@ -1090,6 +1090,16 @@ Response: {
 | `divining` | 擲筊中 (過渡狀態) | **動畫效果**：<br>- 顯示擲筊動畫或 Loading 效果<br>- 隨後自動顯示結果 |
 | `asking_for_question` | 持續提問<br>(僅付費版) | **對話介面**：<br>- 文字輸入框 (輸入追問)<br>- 「沒有問題/謝謝」按鈕 (結束對話) |
 | `completed` | 已完成 | **結束畫面**：<br>- 免費版：顯示單次擲筊結果 (聖/笑/陰) 與解讀<br>- 付費版：顯示三次擲筊結果（如「聖筊 → 笑筊 → 陰筊」）+ 組合類型 + AI 解讀<br>- 「重新開始」按鈕 |
+
+### 4. 黃道吉日 (Auspicious Date)
+
+| 狀態 (`state`) | 說明 | 建議 UI 顯示 |
+|---|---|---|
+| `waiting_basic_info` | 等待基本資訊 | **表單輸入**：<br>- 姓名 (Text)<br>- 性別 (Select: 男/女)<br>- 生日 (Date Picker)<br>- 生肖 (Select: 鼠/牛/虎/兔/龍/蛇/馬/羊/猴/雞/狗/豬) |
+| `waiting_category_and_date` | 等待分類與日期選擇 | **方式一（推薦）**：<br>- **分類選擇器**：5 個按鈕或下拉選單<br>  - 生活日常 (`daily_life`)<br>  - 家庭居所 (`family_home`)<br>  - 感情人際 (`relationship`)<br>  - 喜慶大事 (`celebration`)<br>  - 工作事業 (`work_career`)<br>- **日期選擇器**：日曆元件 (Calendar Picker)<br><br>**方式二（彈性）**：<br>- 文字輸入框：允許輸入「家庭居所，2025-12-15」 |
+| `waiting_specific_question` | 等待具體事項描述 | **文字輸入框**：<br>- 提示語：「請描述您具體想做的事情...」<br>- 範例：「我要搬新家」、「簽約買房」<br>- 發送按鈕 |
+| `providing_dates` | 提供吉日建議<br>(開發中) | **結果顯示**：<br>- 顯示所選日期的黃曆資訊<br>- 顯示「宜」「忌」事項<br>- AI 建議與注意事項 |
+| `completed` | 已完成 | **結束畫面**：<br>- 顯示完整吉日分析<br>- 「重新開始」按鈕 |
 
 ---
 

@@ -32,6 +32,7 @@ class AuspiciousSession:
         self.user_name: Optional[str] = None
         self.user_gender: Optional[str] = None
         self.birthdate: Optional[str] = None
+        self.zodiac: Optional[str] = None  # 生肖
         self.category: Optional[str] = None  # 選擇的分類
         self.selected_date: Optional[str] = None  # 選擇的具體日期 (YYYY-MM-DD)
         self.specific_question: Optional[str] = None  # 具體問題描述
@@ -50,6 +51,7 @@ class AuspiciousSession:
             "user_name": self.user_name,
             "user_gender": self.user_gender,
             "birthdate": self.birthdate,
+            "zodiac": self.zodiac,
             "category": self.category,
             "selected_date": self.selected_date,
             "specific_question": self.specific_question,
@@ -65,6 +67,7 @@ class AuspiciousSession:
         session.user_name = data.get("user_name")
         session.user_gender = data.get("user_gender")
         session.birthdate = data.get("birthdate")
+        session.zodiac = data.get("zodiac")
         session.category = data.get("category")
         session.selected_date = data.get("selected_date")
         session.specific_question = data.get("specific_question")
@@ -87,9 +90,9 @@ class AuspiciousAgent:
             user_input: 用戶輸入
 
         Returns:
-            包含 name, gender, birthdate 的字典
+            包含 name, gender, birthdate, zodiac 的字典
         """
-        system_prompt = """你是專業的資訊擷取助理。請從使用者輸入中提取姓名、性別與生日資訊。
+        system_prompt = """你是專業的資訊擷取助理。請從使用者輸入中提取姓名、性別、生日與生肖資訊。
 
 生日格式不限，可能的格式包括：
 - 1990年7月12日
@@ -103,21 +106,27 @@ class AuspiciousAgent:
 - M、F
 - male、female
 
+生肖可能以以下方式表達：
+- 鼠、牛、虎、兔、龍、蛇、馬、羊、猴、雞、狗、豬
+- 屬鼠、屬牛等
+
 請以 JSON 格式回應：
 {
     "name": "姓名或null",
     "gender": "male/female/null",
     "birthdate": "YYYY/MM/DD格式或null",
+    "zodiac": "生肖（鼠/牛/虎/兔/龍/蛇/馬/羊/猴/雞/狗/豬）或null",
     "error_message": "如果資訊不完整，說明缺少什麼"
 }
 
 注意：
 1. 生日必須轉換為 YYYY/MM/DD 格式
 2. 民國年份需要轉換為西元年份（民國年+1911）
-3. 如果資訊不完整，在 error_message 中說明
+3. 生肖必須是十二生肖之一：鼠、牛、虎、兔、龍、蛇、馬、羊、猴、雞、狗、豬
+4. 如果資訊不完整，在 error_message 中說明
 """
 
-        user_prompt = f"請從以下輸入中提取姓名、性別與生日資訊：\n{user_input}"
+        user_prompt = f"請從以下輸入中提取姓名、性別、生日與生肖資訊：\n{user_input}"
 
         try:
             response = self.gpt_client.structured(
@@ -133,6 +142,7 @@ class AuspiciousAgent:
                 "name": result.get("name"),
                 "gender": result.get("gender"),
                 "birthdate": result.get("birthdate"),
+                "zodiac": result.get("zodiac"),
                 "error_message": result.get("error_message"),
             }
 
@@ -142,5 +152,6 @@ class AuspiciousAgent:
                 "name": None,
                 "gender": None,
                 "birthdate": None,
+                "zodiac": None,
                 "error_message": "無法解析輸入資訊",
             }

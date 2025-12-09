@@ -30,24 +30,24 @@ FREE_TONE_GREETINGS = {
 最近有什麼重要的事情想安排嗎？搬家、結婚、開業，或只是想找個順利一點的日子都可以～
 把你的計畫放心交給我，我會先記下你的資料，再幫你從黃曆裡找出適合的好日子 🙌
 
-請告訴我你的姓名、性別與生日。
-例如：王小明 男 1990/07/12""",
+請告訴我你的姓名、性別、生日與生肖。
+例如：王小明 男 1990/07/12 屬馬""",
     "caring": """親愛的旅人，歡迎回到這本為你打開的吉日曆 🌿
 擇日是一份溫柔的照顧，不是迷信數字，
 而是替你的重要時刻多一層安心。
 你可以慢慢說，我會依照你的資料，
 幫你找出最貼近你心意的好日子。
 
-請告訴我你的姓名、性別與生日。
-例如：王小明 男 1990/07/12""",
+請告訴我你的姓名、性別、生日與生肖。
+例如：王小明 男 1990/07/12 屬馬""",
     "ritual": """歡迎步入《黃道吉日擇日之殿》🕯
 日辰與星象皆有其節律，
 每一個被選中的日子都承載著特殊的氣場。
 準備好後，把你的基本資訊告訴我，
 我將為你啟動正式的擇日流程。
 
-請告訴我你的姓名、性別與生日。
-例如：王小明 男 1990/07/12""",
+請告訴我你的姓名、性別、生日與生肖。
+例如：王小明 男 1990/07/12 屬馬""",
 }
 
 # 未選擇語氣的提示
@@ -58,22 +58,22 @@ NO_TONE_MESSAGE = """小提醒 🌟：請先選擇您想要的對話語氣，
 # 基本資訊錯誤提示
 BASIC_INFO_ERROR_TEMPLATES = {
     "friendly": """噢～我好像還沒收到完整的資料呢 😅
-請再幫我輸入一次「姓名、性別、生日」喔～
+請再幫我輸入一次「姓名、性別、生日、生肖」喔～
 格式像這樣：
-📝 王小明 男 1990/07/12
-　 或 李小華 女 1985/03/25
+📝 王小明 男 1990/07/12 屬馬
+　 或 李小華 女 1985/03/25 屬牛
 重新給我一次，我就能繼續幫你查黃道吉日啦 🌟""",
     "caring": """我收到你的訊息了，但好像還少了一些重要資訊 🌜
-為了能根據你的命盤與節氣精準挑選吉日，需要你再提供一次：「姓名、性別、生日」。
+為了能根據你的命盤與節氣精準挑選吉日，需要你再提供一次：「姓名、性別、生日、生肖」。
 範例：
-🕊 王小明 男 1990/07/12
-🕊 李小華 女 1985/03/25
+🕊 王小明 男 1990/07/12 屬馬
+🕊 李小華 女 1985/03/25 屬牛
 當我收到完整資料後，就能正式替你查詢並解讀黃道吉日。""",
     "ritual": """我已聽見你的回應，但擇日儀式仍需要更完整的資料才能啟動 🕯
-請重新提供「姓名、性別、生日」，以正式開啟黃道吉日的擇日流程。
+請重新提供「姓名、性別、生日、生肖」，以正式開啟黃道吉日的擇日流程。
 請以以下格式重新輸入：
-◆ 王小明 男 1990/07/12
-◆ 李小華 女 1985/03/25
+◆ 王小明 男 1990/07/12 屬馬
+◆ 李小華 女 1985/03/25 屬牛
 當資料齊備後，我便能為你開啟通往吉日之門 ✨""",
 }
 
@@ -256,11 +256,17 @@ def handle_chat(version: str):
         extracted = agent.extract_basic_info(message)
 
         # 驗證是否提取成功
-        if extracted["name"] and extracted["gender"] and extracted["birthdate"]:
+        if (
+            extracted["name"]
+            and extracted["gender"]
+            and extracted["birthdate"]
+            and extracted["zodiac"]
+        ):
             # 保存資訊
             auspicious_session.user_name = extracted["name"]
             auspicious_session.user_gender = extracted["gender"]
             auspicious_session.birthdate = extracted["birthdate"]
+            auspicious_session.zodiac = extracted["zodiac"]
             auspicious_session.state = AuspiciousState.WAITING_CATEGORY_AND_DATE
 
             # 返回分類選擇提示
@@ -274,7 +280,7 @@ def handle_chat(version: str):
                 "session_id": session_id,
                 "response": response_text,
                 "state": auspicious_session.state.value,
-                "categories": CATEGORIES,  # 返回分類供前端顯示
+                "categories": CATEGORIES,  # 返回所有分類供前端顯示
             }
         else:
             # 格式錯誤，返回錯誤訊息
