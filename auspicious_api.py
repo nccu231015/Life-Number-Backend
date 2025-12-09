@@ -352,9 +352,69 @@ def handle_chat(version: str):
         auspicious_session.specific_question = message
         auspicious_session.state = AuspiciousState.PROVIDING_DATES
 
-        # TODO: 實作黃曆查詢和 LLM 推薦邏輯
-        # 目前先返回簡單訊息
-        response_text = f"收到！我會為你查詢「{message}」在「{auspicious_session.selected_date}」這天是否適合。\n\n（此功能正在開發中，敬請期待 🚧）"
+        # 查詢黃曆資料
+        from auspicious.modules.calendar_db import CalendarDB
+        from shared.gpt_client import GPTClient
+
+        calendar_db = CalendarDB()
+        gpt_client = GPTClient()
+
+        # 從選擇的日期提取年月（YYYY-MM）
+        selected_date = auspicious_session.selected_date  # 格式: YYYY-MM-DD
+        year_month = selected_date[:7]  # 取前7位：YYYY-MM
+
+        # 查詢該月份的黃曆資料
+        calendar_content = calendar_db.get_month_data(year_month)
+
+        if calendar_content:
+            # 使用 AI 分析黃曆與用戶需求
+            category_name = CATEGORIES.get(auspicious_session.category, {}).get(
+                "name", auspicious_session.category
+            )
+
+            system_prompt = f"""你是專業的黃道吉日顧問。請根據黃曆資料，判斷指定日期是否適合用戶的需求。
+
+用戶資訊：
+- 姓名：{auspicious_session.user_name}
+- 性別：{auspicious_session.user_gender}
+- 生日：{auspicious_session.birthdate}
+- 生肖：{auspicious_session.zodiac}
+- 選擇日期：{selected_date}
+- 查詢分類：{category_name}
+- 具體事項：{message}
+
+黃曆資料（{year_month}月）：
+{calendar_content}
+
+請根據以上資訊：
+1. 從黃曆中找到 {selected_date} 這一天的「宜」和「忌」事項
+2. 判斷用戶要做的事情（{message}）是否適合在這天進行
+3. 如果黃曆中有「沖」的生肖，檢查是否沖到用戶的生肖（{auspicious_session.zodiac}）
+4. 給出專業、溫和的建議
+
+回覆格式：
+- 如果適合：說明為什麼適合，可以特別提到哪些「宜」的事項與用戶需求相符
+- 如果不適合：溫和地說明為什麼不建議，並提供替代建議
+- 如果沖生肖：溫和提醒，但也說明化解方法
+- 語氣要符合「{auspicious_session.tone}」，親切且專業
+"""
+
+            user_prompt = f"請分析 {selected_date} 這天是否適合「{message}」。"
+
+            try:
+                ai_response = gpt_client.chat(
+                    system_prompt=system_prompt,
+                    user_prompt=user_prompt,
+                    temperature=0.7,
+                    max_tokens=500,
+                )
+                response_text = ai_response
+            except Exception as e:
+                print(f"AI 分析錯誤: {e}")
+                response_text = f"抱歉，在分析黃曆時遇到了一些技術問題。不過根據你選擇的日期 {selected_date}，建議你可以再確認一下當天的具體時辰和個人情況。"
+        else:
+            # 沒有該月份的黃曆資料
+            response_text = f"很抱歉，目前系統尚未收錄 {year_month} 月份的黃曆資料。請選擇其他月份，或稍後再試。"
 
         auspicious_session.add_message("assistant", response_text)
         auspicious_session.state = AuspiciousState.COMPLETED
