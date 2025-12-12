@@ -111,14 +111,21 @@
   - `POST /auspicious/free/api/init_with_tone`
   - `POST /auspicious/free/api/chat`
   - `POST /auspicious/free/api/reset`
-  - 3 種基礎語氣 (friendly, caring, ritual)
+  - **3 種基礎語氣**: friendly, caring, ritual
   - **5 種分類**: 生活日常、家庭居所、感情人際、喜慶大事、工作事業
   - **資料庫驅動**: 黃曆資料從 Supabase 查詢
   - **智能日期選擇**: 支援按鈕選擇或文字輸入日期
-  - **分類查詢**: 根據不同事項類別查詢適合日期
+  - **AI 分析**: 根據黃曆「宜」「忌」欄位進行分析
+  - **單次查詢**: 查詢完成後對話結束
 
-- 🚧 **付費版** (待實作):
-  - 計劃支持更深度的黃曆解讀和多日期推薦
+- ✅ **付費版** (已實作):
+  - `POST /auspicious/paid/api/init_with_tone`
+  - `POST /auspicious/paid/api/chat`
+  - `POST /auspicious/paid/api/reset`
+  - **9 種神明語氣**: 包含關聖帝君、媽祖、月老等
+  - **深度解讀**: 以神明性格進行個性化黃曆分析
+  - **持續對話**: 查詢後可針對結果進行多輪追問
+  - **智能結束**: 檢測結束關鍵詞（「謝謝」、「沒有」等），給出神明特色結束語
 
 - `GET /health` - 健康檢查
 - `GET /` - API 資訊

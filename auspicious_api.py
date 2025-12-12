@@ -55,6 +55,73 @@ NO_TONE_MESSAGE = """小提醒 🌟：請先選擇您想要的對話語氣，
 這樣我才能用最適合你的方式替你查詢黃道吉日並說明建議 👇
 🔸請選擇：「friendly / caring / ritual」"""
 
+# 付費版語氣配置（9種神明）
+PAID_TONE_PROMPTS = {
+    "guan_gong": {
+        "name": "關聖帝君（主神）",
+        "style": "莊嚴、正直、有威信",
+        "keywords": "忠義、正道、守信、報應、明辨是非",
+        "example": "「行於正道，心自無愧。是非有報，天理昭昭。」",
+        "greeting": "我是關聖帝君。既然來到這裡求問吉日，請帶著誠心。你心中的安排，我會為你明辨良辰，指引方向。\n\n請告訴我你的姓名、性別、生日與生肖。\n例如：王小明 男 1990/07/12 屬馬",
+    },
+    "wealth_god": {
+        "name": "五路財神",
+        "style": "豪爽、自信、帶鼓舞氣場",
+        "keywords": "財運、貴人、機會、行動、回報",
+        "example": "「財不聚怠惰人，行動即是開運的起點。勤者得財，信者得福。」",
+        "greeting": "哈哈哈！恭喜發財！我是五路財神。想挑個開業吉日、簽約好日？來來來，讓我看看哪天能替你招財進寶！\n\n請告訴我你的姓名、性別、生日與生肖。\n例如：王小明 男 1990/07/12 屬馬",
+    },
+    "wen_chang": {
+        "name": "文昌帝君",
+        "style": "沉穩、理性、帶學者氣息",
+        "keywords": "學習、啟發、智慧、思辨、修身",
+        "example": "「勤讀者，心明而志定。修德養性，功名自來。」",
+        "greeting": "學海無涯，唯勤是岸。我是文昌帝君。你有什麼學業、考試、簽約的大事想選個好日子？說來聽聽。\n\n請告訴我你的姓名、性別、生日與生肖。\n例如：王小明 男 1990/07/12 屬馬",
+    },
+    "yue_lao": {
+        "name": "月老星君",
+        "style": "溫柔、睿智、帶人情味",
+        "keywords": "緣分、誠心、愛情、相遇、和合",
+        "example": "「紅線不亂繞，真心自相牽。緣來時，請以誠相待。」",
+        "greeting": "千里姻緣一線牽。我是月老。孩子，是想挑個好日子辦婚事嗎？來，讓我為你理理這條紅線。\n\n請告訴我你的姓名、性別、生日與生肖。\n例如：王小明 男 1990/07/12 屬馬",
+    },
+    "guanyin": {
+        "name": "觀音菩薩",
+        "style": "慈悲、柔和、帶母性與寬慰",
+        "keywords": "慈悲、願力、平安、覺悟、善念",
+        "example": "「願你以善為舟，度己度人。靜聽內心，慈悲自現。」",
+        "greeting": "南無大慈大悲觀世音菩薩。善哉善哉。孩子，心裡有什麼重要的日子想安排？我願以慈悲之心，為你擇選良辰。\n\n請告訴我你的姓名、性別、生日與生肖。\n例如：王小明 男 1990/07/12 屬馬",
+    },
+    "mazu": {
+        "name": "媽祖",
+        "style": "穩定、溫厚、如母親般的包容",
+        "keywords": "平安、庇佑、守護、航程、母愛",
+        "example": "「風浪不懼，因為我在你身旁。信念如舟，必達彼岸。」",
+        "greeting": "海不揚波，民生安樂。我是默娘。孩子，人生像行船，大事小事都要挑個好日子。別怕，我會幫你守護。\n\n請告訴我你的姓名、性別、生日與生肖。\n例如：王小明 男 1990/07/12 屬馬",
+    },
+    "jiutian": {
+        "name": "九天娘娘",
+        "style": "神秘、果斷、帶女戰神氣勢",
+        "keywords": "啟示、力量、轉機、覺醒、行動",
+        "example": "「命運非天定，覺醒者自創天命。敢行者，天地助之。」",
+        "greeting": "天道無親，常與善人。我是九天玄女。你的大事，需要一個有力量的日子。準備好接受天命了嗎？\n\n請告訴我你的姓名、性別、生日與生肖。\n例如：王小明 男 1990/07/12 屬馬",
+    },
+    "guanyin_health": {
+        "name": "觀音菩薩（健康長壽）",
+        "style": "平靜、柔和、安撫人心",
+        "keywords": "療癒、安寧、健康、慈悲、復原",
+        "example": "「以慈悲護體，以平靜養心。身安即福，心寧即壽。」",
+        "greeting": "身心安頓，方得自在。我是觀音。孩子，身體髮膚受之父母，要好好愛惜。有什麼健康相關的日子想選嗎？\n\n請告訴我你的姓名、性別、生日與生肖。\n例如：王小明 男 1990/07/12 屬馬",
+    },
+    "fude": {
+        "name": "福德正神",
+        "style": "樸實、親切、有長輩感",
+        "keywords": "福報、穩定、家運、土地、勤誠",
+        "example": "「厚德載福，勤誠得財。守本分者，天地自報之。」",
+        "greeting": "呵呵呵，土地公來囉！我是福德正神。家和萬事興，平安就是福。孩子，有什麼家裡的大事想挑個好日子？\n\n請告訴我你的姓名、性別、生日與生肖。\n例如：王小明 男 1990/07/12 屬馬",
+    },
+}
+
 # 基本資訊錯誤提示
 BASIC_INFO_ERROR_TEMPLATES = {
     "friendly": """噢～我好像還沒收到完整的資料呢 😅
@@ -193,20 +260,13 @@ def handle_init_with_tone(version: str):
     # 驗證語氣
     if version == "free":
         if not tone or tone not in FREE_TONE_PROMPTS:
-            return (
-                jsonify(
-                    {
-                        "error": "無效的語氣選擇",
-                        "message": NO_TONE_MESSAGE,
-                        "valid_tones": list(FREE_TONE_PROMPTS.keys()),
-                    }
-                ),
-                400,
-            )
+            return jsonify({"error": "無效的語氣選擇", "message": NO_TONE_MESSAGE}), 400
         greeting = FREE_TONE_GREETINGS[tone]
-    else:
-        # 付費版（暫未實作）
-        return jsonify({"error": "付費版尚未開放"}), 400
+    else:  # paid
+        if not tone or tone not in PAID_TONE_PROMPTS:
+            # 默認使用關聖帝君
+            tone = "guan_gong"
+        greeting = PAID_TONE_PROMPTS[tone]["greeting"]
 
     # 創建新會話
     session_id = str(uuid.uuid4())
@@ -271,7 +331,22 @@ def handle_chat(version: str):
 
             # 返回分類選擇提示
             tone = auspicious_session.tone
-            response_text = CATEGORY_SELECTION_PROMPT[tone]
+
+            # 判斷是免費版還是付費版語氣
+            if tone in CATEGORY_SELECTION_PROMPT:
+                # 免費版：使用對應語氣的提示
+                response_text = CATEGORY_SELECTION_PROMPT[tone]
+            else:
+                # 付費版：使用通用提示（神明語氣）
+                response_text = """接下來請選擇你要查詢的分類，並選擇一個日期：
+
+🔸 生活日常 - 出門治公、購物、聚會
+🔸 家庭居所 - 搬家、簽約、動工
+🔸 感情人際 - 約會、告白、合作
+🔸 喜慶大事 - 婚嫁、慶典、開業
+🔸 工作事業 - 開工、會議、啟動計劃
+
+請告訴我分類和日期（例如：「感情人際，2025-12-25」）。"""
 
             # 記錄助手回應
             auspicious_session.add_message("assistant", response_text)
@@ -417,15 +492,135 @@ def handle_chat(version: str):
             response_text = f"很抱歉，目前系統尚未收錄 {year_month} 月份的黃曆資料。請選擇其他月份，或稍後再試。"
 
         auspicious_session.add_message("assistant", response_text)
-        auspicious_session.state = AuspiciousState.COMPLETED
+
+        # 付費版：進入持續對話狀態
+        if version == "paid":
+            ask_question = "\n\n如果您對選擇的日期或建議有任何疑問，歡迎繼續提問。我會為您詳細解答。"
+            response_text_with_prompt = f"{response_text}{ask_question}"
+            auspicious_session.state = AuspiciousState.ASKING_FOR_QUESTION
+            # 更新對話歷史中的最後一條訊息
+            if auspicious_session.conversation_history:
+                auspicious_session.conversation_history[-1]["content"] = (
+                    response_text_with_prompt
+                )
+        else:
+            # 免費版：直接完成
+            response_text_with_prompt = response_text
+            auspicious_session.state = AuspiciousState.COMPLETED
+
+        response_data = {
+            "session_id": session_id,
+            "response": response_text_with_prompt,
+            "state": auspicious_session.state.value,
+            "specific_question": message,
+        }
+
+        return save_and_return(version, session_id, auspicious_session, response_data)
+
+    elif auspicious_session.state == AuspiciousState.ASKING_FOR_QUESTION:
+        # 付費版持續對話狀態
+        # 檢查用戶是否想結束對話
+        no_question_keywords = [
+            "沒有",
+            "没有",
+            "不用",
+            "沒了",
+            "没了",
+            "好了",
+            "謝謝",
+            "谢谢",
+            "感恩",
+            "不需要",
+            "不用了",
+            "再見",
+            "掰掰",
+            "可以了",
+            "夠了",
+        ]
+        if (
+            any(keyword in message for keyword in no_question_keywords)
+            and len(message) < 15
+        ):
+            # 結束對話
+            auspicious_session.state = AuspiciousState.COMPLETED
+
+            # 根據神明生成結束語
+            tone = auspicious_session.tone
+            tone_config = PAID_TONE_PROMPTS.get(tone, PAID_TONE_PROMPTS["guan_gong"])
+
+            end_messages = {
+                "guan_gong": "既然沒有其他疑問，我就先退駕了。願你行於正道，諸事順遂。",
+                "wealth_god": "好！那就祝你財源廣進，生意興隆啦！有需要再來找我！",
+                "wen_chang": "既然清楚了，那就好好努力吧。功名利祿，自有天定。",
+                "yue_lao": "既然沒有其他問題，那就祝你良緣早至，幸福美滿。",
+                "guanyin": "既然心中已明，那就好好珍惜這段緣分。南無觀世音菩薩。",
+                "mazu": "既然沒有其他問題，那媽祖就先退了。願你平安順遂，一帆風順。",
+                "jiutian": "既然清楚了，那就勇敢前行吧。天命在你手中。",
+                "guanyin_health": "既然沒有其他疑問，那就好好保重身體。身心安康即是福。",
+                "fude": "呵呵，好好好！那土地公就先退了。家和萬事興，平安就是福。",
+            }
+            response_text = end_messages.get(
+                tone, "既然沒有其他問題，那就祝你諸事順遂，平安喜樂。"
+            )
+
+            auspicious_session.add_message("assistant", response_text)
+
+            response_data = {
+                "session_id": session_id,
+                "response": response_text,
+                "state": auspicious_session.state.value,
+            }
+            return save_and_return(
+                version, session_id, auspicious_session, response_data
+            )
+
+        # 繼續對話 - 使用 AI 以神明口吻回答
+        tone = auspicious_session.tone
+        tone_config = PAID_TONE_PROMPTS.get(tone, PAID_TONE_PROMPTS["guan_gong"])
+
+        from shared.gpt_client import GPTClient
+
+        gpt_client = GPTClient()
+
+        # 建立對話上下文
+        system_prompt = f"""你是{tone_config["name"]}。
+
+風格：{tone_config["style"]}
+關鍵詞：{tone_config["keywords"]}
+說話範例：{tone_config["example"]}
+
+用戶已經查詢了黃道吉日，現在有後續問題。請以神明的身分，用溫和且專業的口吻回答。
+
+用戶資訊：
+- 姓名：{auspicious_session.user_name}
+- 選擇日期：{auspicious_session.selected_date}
+- 分類：{auspicious_session.category}
+- 具體事項：{auspicious_session.specific_question}
+
+請保持角色一致，不要重複已經說過的內容，直接回答用戶的疑問。"""
+
+        user_prompt = f"{auspicious_session.user_name}的追問：{message}"
+
+        try:
+            response_text = gpt_client.ask(
+                system_prompt=system_prompt,
+                user_prompt=user_prompt,
+                temperature=0.7,
+                max_tokens=400,
+            )
+        except Exception as e:
+            print(f"AI 回應錯誤: {e}")
+            response_text = (
+                "抱歉，我現在無法回答你的問題。請稍後再試，或者換個方式提問。"
+            )
+
+        auspicious_session.add_message("assistant", response_text)
 
         response_data = {
             "session_id": session_id,
             "response": response_text,
             "state": auspicious_session.state.value,
-            "specific_question": message,
         }
-
         return save_and_return(version, session_id, auspicious_session, response_data)
 
     return (
@@ -470,3 +665,21 @@ def free_chat():
 @auspicious_bp.route("/free/api/reset", methods=["POST"])
 def free_reset():
     return handle_reset("free")
+
+
+# ========== 付費版路由 ==========
+
+
+@auspicious_bp.route("/paid/api/init_with_tone", methods=["POST"])
+def paid_init():
+    return handle_init_with_tone("paid")
+
+
+@auspicious_bp.route("/paid/api/chat", methods=["POST"])
+def paid_chat():
+    return handle_chat("paid")
+
+
+@auspicious_bp.route("/paid/api/reset", methods=["POST"])
+def paid_reset():
+    return handle_reset("paid")

@@ -20,6 +20,7 @@ class AuspiciousState(Enum):
     WAITING_CATEGORY_AND_DATE = "waiting_category_and_date"  # 等待分類和日期選擇
     WAITING_SPECIFIC_QUESTION = "waiting_specific_question"  # 等待具體問題描述
     PROVIDING_DATES = "providing_dates"  # 提供吉日建議
+    ASKING_FOR_QUESTION = "asking_for_question"  # 詢問是否有其他問題（付費版）
     COMPLETED = "completed"  # 完成
 
 

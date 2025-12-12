@@ -542,6 +542,62 @@ def main():
         )
     )
 
+    # 4.2 付費版 - 包含持續對話
+    results.append(
+        (
+            "Auspicious Date Paid",
+            run_flow(
+                "黃道吉日",
+                "paid",
+                [
+                    (
+                        "初始化會話",
+                        "/auspicious/paid/api/init_with_tone",
+                        {"tone": "yue_lao"},
+                    ),
+                    (
+                        "提交基本資訊",
+                        "/auspicious/paid/api/chat",
+                        lambda sid: {
+                            "session_id": sid,
+                            "message": "李小美 女 1995/05/20 屬豬",
+                        },
+                    ),
+                    (
+                        "選擇分類和日期",
+                        "/auspicious/paid/api/chat",
+                        lambda sid: {
+                            "session_id": sid,
+                            "category": "relationship",
+                            "selected_date": "2025-12-25",
+                        },
+                    ),
+                    (
+                        "描述事項",
+                        "/auspicious/paid/api/chat",
+                        lambda sid: {
+                            "session_id": sid,
+                            "message": "我想訂婚，想知道這天適合嗎",
+                        },
+                    ),
+                    (
+                        "追問",
+                        "/auspicious/paid/api/chat",
+                        lambda sid: {
+                            "session_id": sid,
+                            "message": "那有什麼需要特別注意的嗎？",
+                        },
+                    ),
+                    (
+                        "結束對話",
+                        "/auspicious/paid/api/chat",
+                        lambda sid: {"session_id": sid, "message": "謝謝月老"},
+                    ),
+                ],
+            ),
+        )
+    )
+
     # ==========================================
     # 測試結果統計
     # ==========================================
