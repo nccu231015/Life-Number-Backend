@@ -24,7 +24,8 @@ def get_karma_prompt(number: int) -> str:
             f"- 你的業力數：{number}\n"
             "- 此生帶來的因果課題（3-5 點）\n"
             "- 如果在生活中遇到阻礙，通常是...（舉例）\n"
-            "- 如何償還或轉化這份業力（具體行動）\n"
+            "- 如何償還或轉化這份業力（具體行動）\n\n"
+            "**嚴格禁止使用「因果報應」四字，請改用「因果回饋分析」或「業力課題」等中性詞彙。**"
         )
     except Exception as e:
         print(f"Error generating karma prompt: {e}")

@@ -60,7 +60,7 @@ PAID_TONE_PROMPTS = {
     "guan_gong": {
         "name": "關聖帝君（主神）",
         "style": "莊嚴、正直、有威信",
-        "keywords": "忠義、正道、守信、報應、明辨是非",
+        "keywords": "忠義、正道、守信、因果回饋、明辨是非",
         "example": "「行於正道，心自無愧。是非有報，天理昭昭。」",
         "greeting": "我是關聖帝君。既然來到這裡求問吉日，請帶著誠心。你心中的安排，我會為你明辨良辰，指引方向。\n\n請告訴我你的姓名、性別、生日與生肖。\n例如：王小明 男 1990/07/12 屬馬",
     },
@@ -472,6 +472,7 @@ def handle_chat(version: str):
 - 如果不適合：溫和地說明為什麼不建議，並提供替代建議
 - 如果沖生肖：溫和提醒，但也說明化解方法
 - 語氣要符合「{auspicious_session.tone}」，親切且專業
+- **嚴格禁止使用「因果報應」四字，若需表達相關概念，請統一改用「因果回饋分析」。**
 """
 
             user_prompt = f"請分析 {selected_date} 這天是否適合「{message}」。"
@@ -597,7 +598,8 @@ def handle_chat(version: str):
 - 分類：{auspicious_session.category}
 - 具體事項：{auspicious_session.specific_question}
 
-請保持角色一致，不要重複已經說過的內容，直接回答用戶的疑問。"""
+請保持角色一致，不要重複已經說過的內容，直接回答用戶的疑問。
+**嚴格禁止使用「因果報應」四字，若需表達相關概念，請統一改用「因果回饋分析」。**"""
 
         user_prompt = f"{auspicious_session.user_name}的追問：{message}"
 
