@@ -135,10 +135,15 @@ def execute_module(
         elif module_type == "grid":
             counts = compute_grid_counts(birthdate)
             lines = detect_present_lines(counts)
-            grid_display = build_ascii_grid(counts)
-            # 使用新函數從 DB 獲取 Prompt (需要連線與統計)
+
+            # 若無連線，直接使用 get_grid_prompt 返回的訊息作為最終回應，無需調用 LLM
             system_prompt = get_grid_prompt(lines, counts)
             number = len(lines)
+
+            if not lines:
+                return {"response": system_prompt, "number": 0}
+
+            grid_display = build_ascii_grid(counts)
             extra_info = f"九宮格：\n{grid_display}\n連線：{lines}\n"
         elif module_type == "soul":
             number = compute_soul_number(english_name)
