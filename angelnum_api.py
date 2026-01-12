@@ -543,6 +543,32 @@ def handle_chat(version: str):
                 wants_to_end = True
                 break
 
+        # 檢查是否試圖詢問新的天使數字
+        # 如果輸入純數字且與當前數字不同，提示需開啟新對話
+        if not wants_to_end:
+            import re
+
+            clean_input = user_input.strip()
+            # 檢查是否為 3-4 位純數字，且與當前數字不同
+            if (
+                clean_input.isdigit()
+                and len(clean_input) in [3, 4]
+                and clean_input != conv_session.angel_number
+            ):
+                response = "您只能針對第一次的數字提問，新的數字請開啟新的對話串呦 ✨"
+                conv_session.add_message("assistant", response)
+                return save_and_return(
+                    version,
+                    session_id,
+                    conv_session,
+                    {
+                        "session_id": session_id,
+                        "response": response,
+                        "state": conv_session.state.value,
+                        "requires_input": True,
+                    },
+                )
+
         if wants_to_end:
             # 結束對話
             if conv_session.tone == "friendly":
