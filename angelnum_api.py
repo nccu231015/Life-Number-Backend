@@ -546,8 +546,6 @@ def handle_chat(version: str):
         # 檢查是否試圖詢問新的天使數字
         # 如果輸入純數字且與當前數字不同，提示需開啟新對話
         if not wants_to_end:
-            import re
-
             clean_input = user_input.strip()
             # 檢查是否為 3-4 位純數字，且與當前數字不同
             if (
