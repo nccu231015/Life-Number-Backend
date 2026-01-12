@@ -388,9 +388,14 @@ def handle_chat(version: str):
             if "，" in message or "," in message:
                 parts = message.replace("，", ",").split(",")
                 if len(parts) >= 2:
-                    # 嘗試匹配分類
+                    # 嘗試匹配分類（支援英文 key 或中文名稱）
+                    category_input = parts[0].strip()
                     for cat_key, cat_info in CATEGORIES.items():
-                        if cat_info["name"] in parts[0]:
+                        # 檢查是否匹配英文 key 或中文名稱
+                        if (
+                            cat_key == category_input
+                            or cat_info["name"] in category_input
+                        ):
                             auspicious_session.category = cat_key
                             break
                     auspicious_session.selected_date = parts[1].strip()
