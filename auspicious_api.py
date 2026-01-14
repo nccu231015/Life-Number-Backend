@@ -453,10 +453,10 @@ def handle_chat(version: str):
             if tone in ["friendly", "caring"]:
                 response_text = "不好意思，本平台不提供投資、賭博或保證獲利等相關建議呦～\n\n我們只能提供一般的黃曆文化與資料說明。如果你有其他生活上的事項想查詢，歡迎重新詢問！"
             elif tone == "ritual":
-                response_text = "抱歉，本平台不提供此類行為或結果之建議，僅能提供一般文化與資料說明。\n\n若您有其他正當事項需要查詢黃曆，請重新提問。"
+                response_text = "抱歉，本平台不提供此類行為或結果之建議，僅能提供一般文化與資料說明。\n\n若您有其他一般事項需要查詢黃曆，請重新提問。"
             else:
                 # 付費版神明語氣
-                response_text = "施主，本平台不提供投資、賭博或保證獲利等相關建議。\n\n我僅能提供一般文化與資料說明。若有其他正當事項，歡迎重新詢問。"
+                response_text = "施主，本平台不提供投資、賭博或保證獲利等相關建議。\n\n我僅能提供一般文化與資料說明。若有其他一般事項，歡迎重新詢問。"
 
             auspicious_session.add_message("assistant", response_text)
 
