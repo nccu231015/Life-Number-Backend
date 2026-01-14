@@ -86,7 +86,7 @@ PAID_TONE_PROMPTS = {
         "greeting": "千里姻緣一線牽。我是月老。孩子，是想挑個好日子辦婚事嗎？來，讓我為你理理這條紅線。\n\n請告訴我你的姓名、性別、生日與生肖。\n例如：王小明 男 1990/07/12 屬馬",
     },
     "guanyin": {
-        "name": "觀音菩薩",
+        "name": "觀世音菩薩",
         "style": "慈悲、柔和、帶母性與寬慰",
         "keywords": "慈悲、願力、平安、覺悟、善念",
         "example": "「願你以善為舟，度己度人。靜聽內心，慈悲自現。」",
@@ -105,13 +105,6 @@ PAID_TONE_PROMPTS = {
         "keywords": "啟示、力量、轉機、覺醒、行動",
         "example": "「命運非天定，覺醒者自創天命。敢行者，天地助之。」",
         "greeting": "天道無親，常與善人。我是九天玄女。你的大事，需要一個有力量的日子。準備好接受天命了嗎？\n\n請告訴我你的姓名、性別、生日與生肖。\n例如：王小明 男 1990/07/12 屬馬",
-    },
-    "guanyin_health": {
-        "name": "觀音菩薩（健康長壽）",
-        "style": "平靜、柔和、安撫人心",
-        "keywords": "療癒、安寧、健康、慈悲、復原",
-        "example": "「以慈悲護體，以平靜養心。身安即福，心寧即壽。」",
-        "greeting": "身心安頓，方得自在。我是觀音。孩子，身體髮膚受之父母，要好好愛惜。有什麼健康相關的日子想選嗎？\n\n請告訴我你的姓名、性別、生日與生肖。\n例如：王小明 男 1990/07/12 屬馬",
     },
     "fude": {
         "name": "福德正神",
@@ -430,6 +423,56 @@ def handle_chat(version: str):
     elif auspicious_session.state == AuspiciousState.WAITING_SPECIFIC_QUESTION:
         # 收到具體問題描述
         auspicious_session.specific_question = message
+
+        # 檢測敏感內容
+        sensitive_keywords = [
+            "投資",
+            "買賣",
+            "獲利",
+            "報酬",
+            "彩券",
+            "樂透",
+            "賭博",
+            "保證成功",
+            "一定賺",
+            "炒股",
+            "股票",
+            "期貨",
+            "選擇權",
+            "賭",
+            "博弈",
+            "賺錢",
+            "發財",
+        ]
+
+        contains_sensitive = any(keyword in message for keyword in sensitive_keywords)
+
+        if contains_sensitive:
+            # 根據語氣返回拒絕訊息
+            tone = auspicious_session.tone
+            if tone in ["friendly", "caring"]:
+                response_text = "不好意思，本平台不提供投資、賭博或保證獲利等相關建議呦～\n\n我們只能提供一般的黃曆文化與資料說明。如果你有其他生活上的事項想查詢，歡迎重新詢問！"
+            elif tone == "ritual":
+                response_text = "抱歉，本平台不提供此類行為或結果之建議，僅能提供一般文化與資料說明。\n\n若您有其他正當事項需要查詢黃曆，請重新提問。"
+            else:
+                # 付費版神明語氣
+                response_text = "施主，本平台不提供投資、賭博或保證獲利等相關建議。\n\n我僅能提供一般文化與資料說明。若有其他正當事項，歡迎重新詢問。"
+
+            auspicious_session.add_message("assistant", response_text)
+
+            # 返回拒絕訊息，狀態保持在 WAITING_SPECIFIC_QUESTION
+            auspicious_session.state = AuspiciousState.WAITING_SPECIFIC_QUESTION
+
+            response_data = {
+                "session_id": session_id,
+                "response": response_text,
+                "state": auspicious_session.state.value,
+            }
+
+            return save_and_return(
+                version, session_id, auspicious_session, response_data
+            )
+
         auspicious_session.state = AuspiciousState.PROVIDING_DATES
 
         # 查詢黃曆資料
