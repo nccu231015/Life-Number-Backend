@@ -58,19 +58,6 @@ class LifeNumberDB:
             print(f"DB Error get_grid_line: {e}")
             return None
 
-    def get_grid_missing(self, number: int):
-        try:
-            response = (
-                self.supabase.table("lifenum_grid_missing")
-                .select("*")
-                .eq("number", number)
-                .execute()
-            )
-            return response.data[0] if response.data else None
-        except Exception as e:
-            print(f"DB Error get_grid_missing: {e}")
-            return None
-
     def get_challenge(self, number: int):
         try:
             response = (
