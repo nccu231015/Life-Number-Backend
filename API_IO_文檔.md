@@ -21,10 +21,11 @@
 - ✅ **多語言支持**：資料庫可輕鬆擴充多語言內容
 
 **資料表結構：**
-- 生命靈數：11 個資料表（main, birthday, year, grid, soul, personality, expression, maturity, challenge, karma, grid_missing）
-- 天使數字：2 個資料表（meanings, basic_energy）
-- 占卜系統：2 個資料表（combinations, tone_greetings）
-- 黃道吉日：1 個資料表（auspicious_calendar - 月份黃曆資料）
+- **全域規則**：1 個資料表（ai_global_rules - AI 全域回答規則）
+- **生命靈數**：11 個資料表（main, birthday, year, grid, soul, personality, expression, maturity, challenge, karma, grid_lines）
+- **天使數字**：2 個資料表（meanings, basic_energy）
+- **占卜系統**：2 個資料表（combinations, tone_greetings）
+- **黃道吉日**：1 個資料表（auspicious_calendar - 月份黃曆資料）
 
 I/O 規格文檔
 
@@ -261,6 +262,11 @@ http://localhost:8080
 2. `waiting_question`: 等待用戶輸入問題
 3. `divining`: 用戶輸入問題後，系統回傳引導文案，進入此狀態。用戶需發送請求（如 message="cast"）來觸發擲筊。
 4. `completed` (免費版) / `asking_for_question` (付費版): 擲筊完成，回傳結果解讀。
+
+> ⚠️ **注意：敏感詞過濾**
+> 在 `waiting_question` 狀態，若用戶輸入的問題涉及**投資、賭博、保證獲利**等敏感內容，系統將會拒絕服務。
+> - Response: 返回固定的拒絕訊息（"本平台不提供..."）。
+> - State: 保持在 `waiting_question` 或結束（視實現而定，目前保持原狀態或允許重新提問）。
 
 **免費版 Response:**
 ```jsonc
@@ -1646,9 +1652,157 @@ curl -X POST http://localhost:8080/angel/free/api/chat \
 
 ---
 
+## 🎯 AI 全域規則系統
+
+### 概述
+
+所有四個模組（生命靈數、天使數字、擲筊、黃道吉日）共用一套**動態載入的全域規則**，這些規則從 Supabase `ai_global_rules` 表中讀取，業主可以隨時新增或修改規則，系統會自動在 5 分鐘內更新。
+
+### 設計目標
+
+1. **統一管理**：所有模組的回答原則、禁語、內容限制統一在一個地方管理
+2. **動態更新**：無需重新部署，直接在 Supabase UI 修改即可生效
+3. **容錯機制**：當資料庫不可用時，使用硬編碼的 fallback 規則
+4. **性能優化**：使用 5 分鐘緩存，減少資料庫查詢
+
+### 資料表結構：`ai_global_rules`
+
+| 欄位名稱 | 類型 | 說明 |
+|---------|------|------|
+| `id` | BIGINT | 主鍵，自動遞增 |
+| `created_at` | TIMESTAMP | 創建時間，自動生成 |
+| `rule_key` | TEXT | 規則標識（例如：`avoid_absolute_statements`） |
+| `rule_name` | TEXT | 規則名稱（例如：`避免絕對性判斷`） |
+| `rule_content` | TEXT | 規則的完整文字內容，會直接添加到 LLM prompt 中 |
+
+### 當前全域規則
+
+系統預設包含以下三個全域規則：
+
+#### 1. 避免絕對性判斷
+```
+rule_key: avoid_absolute_statements
+rule_name: 避免絕對性判斷
+rule_content:
+【回答原則】避免給予絕對性的判斷，改用建議導向的表達：
+- 禁止使用「你一定會」、「你絕對不該」、「必須」、「千萬不要」等絕對性表達
+- 請使用「建議」、「可以考慮」、「值得留意」、「或許」等引導性語言
+- 提供多種可能性和方向，而非單一確定的結論
+```
+
+#### 2. 禁止「因果報應」
+```
+rule_key: forbid_karma_punishment
+rule_name: 禁止使用「因果報應」
+rule_content:
+【禁語要求】
+- **嚴格禁止使用「因果報應」四字，若需表達相關概念，請統一改用「因果回饋分析」或「業力課題」。**
+```
+
+#### 3. 敏感內容過濾
+```
+rule_key: filter_sensitive_content
+rule_name: 敏感內容過濾
+rule_content:
+【內容限制】嚴格禁止提供以下類型的建議或解讀：
+- 投資、買賣、獲利、股票、期貨相關建議
+- 彩券、樂透、賭博、博弈相關指引
+- 任何保證成功、一定賺錢的承諾
+
+若用戶詢問上述內容，請回應：「本平台不提供投資、賭博或保證獲利等相關建議。我們只能提供一般的文化與資料說明。如果你有其他生活上的事項想查詢，歡迎重新詢問！」
+```
+
+### 技術實現
+
+#### 規則載入機制
+
+**文件**: `shared/rule_loader.py`
+
+**主要函數**:
+- `load_global_rules()`: 從資料庫載入所有規則並組合成字符串
+- `get_fallback_rules()`: 當資料庫不可用時的備用規則
+- `clear_rules_cache()`: 手動清除緩存（用於測試）
+
+**緩存策略**:
+- 緩存有效期：5 分鐘
+- 自動刷新：緩存過期後下一次請求時自動重新載入
+- 強制刷新：調用 `load_global_rules(force_refresh=True)`
+
+#### 各模組整合情況
+
+| 模組 | 文件 | 整合位置 |
+|------|------|----------|
+| **生命靈數** | `lifenum_api.py` | `execute_module()` 函數的 system prompt |
+| **天使數字** | `angelnum_api.py` | `WAITING_BASIC_INFO` 和 `CONVERSATION` 狀態 |
+| **擲筊** | `divination/agent.py` | `generate_interpretation()`、`generate_followup_response()`、`generate_three_cast_interpretation()` |
+| **黃道吉日** | `auspicious_api.py` | `WAITING_SPECIFIC_QUESTION` 和 `ASKING_FOR_QUESTION` 狀態 |
+
+### 管理指南
+
+#### 如何新增規則
+
+1. 登入 Supabase Dashboard
+2. 進入 `ai_global_rules` 表
+3. 點擊「Insert Row」
+4. 填寫以下欄位：
+   - `rule_key`: 規則的英文標識（snake_case）
+   - `rule_name`: 規則的中文名稱
+   - `rule_content`: 規則的完整內容（會直接添加到 prompt）
+5. 儲存後，系統會在 5 分鐘內自動載入新規則
+
+#### 如何修改規則
+
+1. 在 Supabase 中找到對應的規則行
+2. 直接編輯 `rule_content` 欄位
+3. 儲存後，系統會在 5 分鐘內自動更新
+
+#### 如何停用規則
+
+1. 直接刪除對應的規則行
+2. 系統會在 5 分鐘內停止使用該規則
+
+#### 立即生效（開發環境）
+
+如需立即測試規則變更，可以重啟服務：
+```bash
+# 本地開發
+pkill -f "python app.py"
+python app.py
+
+# GCP Cloud Run 會在下次冷啟動時自動刷新
+```
+
+### 容錯機制
+
+**情境 1：Supabase 暫時不可用**
+- ✅ 系統自動使用硬編碼的 fallback 規則
+- ✅ AI 回應仍然包含基本的規則限制
+- ⚠️ 新增的自定義規則暫時不會生效
+
+**情境 2：資料表為空**
+- ✅ 系統使用 fallback 規則
+- ⚠️ 會在日誌中記錄警告訊息
+
+**情境 3：緩存過期但資料庫查詢失敗**
+- ✅ 保留上一次成功載入的緩存
+- ✅ 直到資料庫恢復為止
+
+### 最佳實踐
+
+1. **測試新規則**：在非高峰時段新增或修改規則
+2. **規則內容格式**：
+   - 使用清晰的標題（如：【回答原則】、【禁語要求】）
+   - 使用列表格式增加可讀性
+   - 避免過長的單行文字
+3. **規則順序**：規則按 `id` 升序排列，較早的規則會先出現在 prompt 中
+4. **避免重複**：不要在多個規則中重複相同的限制
+
+---
+
 ## 📌 版本資訊
 - **API Version**: 1.0.0
-- **Last Updated**: 2025-12-09
+- **Last Updated**: 2026-01-26
 - **部署平台**: GCP Cloud Run
 - **文檔維護**: 每次 API 變更時同步更新
+- **新增功能**: AI 全域規則動態載入系統
 

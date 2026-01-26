@@ -6,6 +6,7 @@
 from enum import Enum
 from typing import Optional, List, Dict, Any
 from shared.gpt_client import GPTClient
+from shared.rule_loader import load_global_rules
 
 
 class DivinationState(Enum):
@@ -53,6 +54,47 @@ class DivinationAgent:
 
     def __init__(self):
         self.gpt_client = GPTClient()
+
+    def check_question_safety(self, question: str) -> Optional[str]:
+        """
+        檢查問題是否安全（遵守全域規則）
+        如果安全，返回 None
+        如果不安全，返回拒絕訊息
+        """
+        # 載入全域規則
+        global_rules = load_global_rules()
+
+        system_prompt = f"""你是一個內容審核助手，你的唯一任務是判斷用戶的問題是否違反【內容限制】。
+
+請嚴格遵守以下規則：
+
+{global_rules}
+
+判斷標準：
+1. 問題是否包含「投資、股票、期貨、虛擬貨幣、彩券、賭博」等關鍵詞？
+2. 問題是否試圖尋求「保證獲利」或「發財」的指引？
+
+---
+
+輸出格式：
+- 如果問題**違反**了規則，你必須直接回傳規則中指定的**固定拒絕訊息**（即「本平台不提供投資...」那段話）。不要添加任何前言或後語。
+- 如果問題是**安全**的，請只回傳 "SAFE"。
+
+不要解釋你的判斷，只回傳 "SAFE" 或 拒絕訊息。"""
+
+        user_prompt = f"用戶問題：{question}"
+
+        # 使用低 temperature 以確保一致性
+        try:
+            response = self.gpt_client.ask(system_prompt, user_prompt, temperature=0.0)
+
+            if "SAFE" in response:
+                return None
+            return response
+        except Exception as e:
+            print(f"Safety check failed: {e}")
+            # 如果檢查失敗，默認放行，或者你可以選擇拒絕
+            return None
 
     def extract_basic_info(self, user_input: str) -> Dict[str, Optional[str]]:
         """
@@ -156,17 +198,11 @@ class DivinationAgent:
 
 請用符合你身份的語氣進行解讀。
 
-【重要原則】請避免給予確定性的答案，改用建議導向的表達：
-- 如果是聖筊，請說「這個筊象顯示正向的能量」、「這個方向值得考慮」，並提供建議
-- 如果是笑筊，溫和說明「時機的考量」，建議信眾調整問題或再觀察
-- 如果是陰筊，以「這個方向可能需要更多準備」來提示，建議信眾思考其他可能性
-- 禁止使用「可以做」、「不可以做」、「應該」、「不應該」、「一定會」等確定性表達
-- 請使用「建議」、「可以考慮」、「值得留意」、「或許」等引導性語言
-
 請直接以神明的口吻回答，不要有「我是AI」等出戲的語句。
 請使用現代白話文，語氣親切自然，不要使用「吾」、「汝」等文言文，但要保持神明的威嚴或慈悲感。
 回答長度約 150-200 字。
-**嚴格禁止使用「因果報應」四字，若需表達相關概念，請統一改用「因果回饋分析」。**"""
+
+{load_global_rules()}"""
 
         try:
             response = self.gpt_client.ask(
@@ -219,13 +255,10 @@ class DivinationAgent:
 請根據神明的身份和之前的擲筊結果，回答信眾的問題。
 回答應具有指引性、慈悲心或威嚴感（視神明身份而定）。
 
-【重要原則】請避免給予確定性的答案，改用建議導向的表達：
-- 禁止使用「可以做」、「不可以做」、「應該」、「不應該」、「一定會」等確定性表達
-- 請使用「建議」、「可以考慮」、「值得留意」、「或許」等引導性語言
-
 請使用現代白話文，語氣親切自然，不要使用「吾」、「汝」等文言文。
 回答長度約 100-150 字。
-**嚴格禁止使用「因果報應」四字，若需表達相關概念，請統一改用「因果回饋分析」。**"""
+
+{load_global_rules()}"""
 
         try:
             response = self.gpt_client.ask(
@@ -281,13 +314,10 @@ class DivinationAgent:
 
 此外，請特別加入一段【行動建議】，給予信眾可行的方向或需要注意的事項，幫助信眾更順利地解決問題。
 
-【重要原則】請避免給予確定性的答案，改用建議導向的表達：
-- 禁止使用「可以做」、「不可以做」、「應該」、「不應該」、「一定會」等確定性表達
-- 請使用「建議」、「可以考慮」、「值得留意」、「或許」等引導性語言
-
 請使用現代白話文，語氣親切自然，不要使用「吾」、「汝」等文言文，但要保持神明應有的威嚴或慈悲感。
 回答長度約 150-200 字。
-**嚴格禁止使用「因果報應」四字，若需表達相關概念，請統一改用「因果回饋分析」。**"""
+
+{load_global_rules()}"""
 
         try:
             response = self.gpt_client.ask(

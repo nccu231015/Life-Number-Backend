@@ -9,6 +9,7 @@ import uuid
 
 from auspicious.agent import AuspiciousAgent, AuspiciousSession, AuspiciousState
 from auspicious.session_store import get_session_store
+from shared.rule_loader import load_global_rules
 
 
 # 創建 Blueprint
@@ -424,55 +425,6 @@ def handle_chat(version: str):
         # 收到具體問題描述
         auspicious_session.specific_question = message
 
-        # 檢測敏感內容
-        sensitive_keywords = [
-            "投資",
-            "買賣",
-            "獲利",
-            "報酬",
-            "彩券",
-            "樂透",
-            "賭博",
-            "保證成功",
-            "一定賺",
-            "炒股",
-            "股票",
-            "期貨",
-            "選擇權",
-            "賭",
-            "博弈",
-            "賺錢",
-            "發財",
-        ]
-
-        contains_sensitive = any(keyword in message for keyword in sensitive_keywords)
-
-        if contains_sensitive:
-            # 根據語氣返回拒絕訊息
-            tone = auspicious_session.tone
-            if tone in ["friendly", "caring"]:
-                response_text = "不好意思，本平台不提供投資、賭博或保證獲利等相關建議呦～\n\n我們只能提供一般的黃曆文化與資料說明。如果你有其他生活上的事項想查詢，歡迎重新詢問！"
-            elif tone == "ritual":
-                response_text = "抱歉，本平台不提供此類行為或結果之建議，僅能提供一般文化與資料說明。\n\n若您有其他一般事項需要查詢黃曆，請重新提問。"
-            else:
-                # 付費版神明語氣
-                response_text = "施主，本平台不提供投資、賭博或保證獲利等相關建議。\n\n我僅能提供一般文化與資料說明。若有其他一般事項，歡迎重新詢問。"
-
-            auspicious_session.add_message("assistant", response_text)
-
-            # 返回拒絕訊息，狀態保持在 WAITING_SPECIFIC_QUESTION
-            auspicious_session.state = AuspiciousState.WAITING_SPECIFIC_QUESTION
-
-            response_data = {
-                "session_id": session_id,
-                "response": response_text,
-                "state": auspicious_session.state.value,
-            }
-
-            return save_and_return(
-                version, session_id, auspicious_session, response_data
-            )
-
         auspicious_session.state = AuspiciousState.PROVIDING_DATES
 
         # 查詢黃曆資料
@@ -514,15 +466,9 @@ def handle_chat(version: str):
 2. 分析這些事項與用戶需求的關聯性
 3. 如果黃曆中有「沖」的生肖，檢查是否沖到用戶的生肖（{auspicious_session.zodiac}），說明可能的影響和化解方式
 4. 提供綜合性的建議
+5. 語氣要符合「{auspicious_session.tone}」，親切且專業
 
-【重要原則】請避免給予確定性的答案，改用建議導向的表達：
-- 禁止直接說「適合」或「不適合」、「可以做」或「不可以做」
-- 使用「從黃曆的角度來看...」、「這天的能量傾向...」、「建議參考...」等表達
-- 如果條件良好，可以說「這天的條件相對有利」、「值得考慮」
-- 如果條件不佳，可以說「可能需要更多準備」、「建議再評估其他日期」
-- 如果沖生肖：溫和提醒影響，但說明「這只是參考，實際決定仍由您自己評估」
-- 語氣要符合「{auspicious_session.tone}」，親切且專業
-- **嚴格禁止使用「因果報應」四字，若需表達相關概念，請統一改用「因果回饋分析」。**
+{load_global_rules()}
 """
 
             user_prompt = f"請分析 {selected_date} 這天是否適合「{message}」。"
@@ -650,11 +596,7 @@ def handle_chat(version: str):
 
 請保持角色一致，不要重複已經說過的內容，直接回答用戶的疑問。
 
-【重要原則】請避免給予確定性的答案，改用建議導向的表達：
-- 禁止使用「可以做」、「不可以做」、「應該」、「不應該」、「一定會」等確定性表達
-- 請使用「建議」、「可以考慮」、「值得留意」、「或許」等引導性語言
-
-**嚴格禁止使用「因果報應」四字，若需表達相關概念，請統一改用「因果回饋分析」。**"""
+{load_global_rules()}"""
 
         user_prompt = f"{auspicious_session.user_name}的追問：{message}"
 

@@ -361,6 +361,23 @@ def handle_chat(version: str):
         return save_and_return(version, session_id, div_session, response_data)
 
     elif div_session.state == DivinationState.WAITING_QUESTION:
+        # 使用 Agent 檢查敏感內容
+        agent = DivinationAgent()
+        sensitive_msg = agent.check_question_safety(message)
+
+        if sensitive_msg:
+            div_session.add_message("assistant", sensitive_msg)
+            return save_and_return(
+                version,
+                session_id,
+                div_session,
+                {
+                    "session_id": session_id,
+                    "response": sensitive_msg,
+                    "state": div_session.state.value,
+                },
+            )
+
         # 保存用戶問題
         div_session.question = message
         div_session.state = DivinationState.DIVINING
