@@ -366,7 +366,7 @@ def handle_chat(version: str):
         else:
             greeting = f"{conv_session.user_name}，關於天使數字 {angel_number} 的解讀如下：\n\n"
 
-        user_prompt = f"使用者的姓名是 {conv_session.user_name},他/她最近反覆看到天使數字 {angel_number}。\n\n請根據這個數字的核心意義,為 {conv_session.user_name} 提供完整、溫暖且具啟發性的解析,幫助他/她理解宇宙想要傳達的訊息。"
+        user_prompt = f"使用者的姓名是 {conv_session.user_name},他/她最近反覆看到天使數字 {angel_number}。\n\n請根據這個數字的核心意義,為 {conv_session.user_name} 提供完整、溫暖且具啟發性的解析,幫助他/她理解宇宙想要傳達的訊息。**請務必在內容中使用「{conv_session.user_name}」來稱呼對方，嚴禁使用「使用者」、「你」等泛稱。**"
 
         try:
             client = GPTClient()

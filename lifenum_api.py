@@ -208,10 +208,17 @@ def execute_module(
         else ""
     )
 
+    # 處理稱呼要求邏輯
+    if greeting:
+        greeting_instruction = f"【稱呼要求】請在回應開頭使用「{greeting.strip()}」作為稱呼，然後繼續提供完整的詳細解析內容。"
+    else:
+        # 付費版動態稱呼，強制要求使用名字
+        greeting_instruction = f"【稱呼要求】請根據設定的語氣與角色，自行生成合適的開頭稱呼。**必須使用使用者的名字「{name}」來稱呼對方，嚴禁使用「使用者」、「用戶」、「朋友」等泛稱。**"
+
     full_system_prompt = f"""{system_prompt}
 
 【語氣要求】{tone_instruction}
-【稱呼要求】請在回應開頭使用「{greeting.strip()}」作為稱呼，然後繼續提供完整的詳細解析內容。稱呼只是開頭，主要內容是生命靈數的深度解析。
+{greeting_instruction}稱呼只是開頭，主要內容是生命靈數的深度解析。
 【內容要求】除了稱呼外，必須提供至少300字以上的完整生命靈數解析，包含性格分析、優勢說明、人生方向建議等詳細內容。絕不可只有稱呼就結束。
 【格式要求】請使用純文字回覆，不要使用任何 markdown 格式標記（如 **、__、#、- 等），直接以清楚的文字和換行組織內容。{privacy_note}
 {load_global_rules()}

@@ -466,7 +466,7 @@ def handle_chat(version: str):
 2. 分析這些事項與用戶需求的關聯性
 3. 如果黃曆中有「沖」的生肖，檢查是否沖到用戶的生肖（{auspicious_session.zodiac}），說明可能的影響和化解方式
 4. 提供綜合性的建議
-5. 語氣要符合「{auspicious_session.tone}」，親切且專業
+5. 語氣要符合「{auspicious_session.tone}」，親切且專業。**請務必在回答中使用用戶的名字「{auspicious_session.user_name}」，嚴禁使用「親愛的使用者」或「用戶」等泛稱。**
 
 {load_global_rules()}
 """
