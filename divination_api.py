@@ -301,6 +301,11 @@ def handle_chat(version: str):
     if not session_id:
         return jsonify({"error": "缺少 session_id"}), 400
 
+    # DEBUG: 打印前端傳入的完整資料
+    print(
+        f"[Divination Debug] Version: {version}, Session: {session_id}, Payload: {data}"
+    )
+
     # 載入會話
     div_session = get_session_by_id(version, session_id)
     if not div_session:
