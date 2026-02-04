@@ -408,9 +408,12 @@ def handle_chat(version: str):
 
         if version == "free":
             # 免費版：單次擲筊
-            import random
+            # 必須從請求中獲取結果
+            result = data.get("divination_result")
 
-            result = random.choice(["holy", "laughing", "negative"])
+            if not result:
+                return jsonify({"error": "缺少擲筊結果 (divination_result)"}), 400
+
             div_session.divination_result = result
 
             # 使用新的整合模板結構
@@ -434,11 +437,16 @@ def handle_chat(version: str):
             }
         else:
             # 付費版：擲三次
-            import random
+            # 必須從請求中獲取結果
+            results = data.get("divination_results")
 
-            results = [
-                random.choice(["holy", "laughing", "negative"]) for _ in range(3)
-            ]
+            if not results or not isinstance(results, list) or len(results) != 3:
+                return jsonify(
+                    {
+                        "error": "缺少或無效的擲筊結果 (divination_results，必須為包含3個結果的列表)"
+                    }
+                ), 400
+
             div_session.divination_results = results
 
             # 判斷組合類型

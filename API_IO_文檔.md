@@ -253,9 +253,14 @@ http://localhost:8080
 ```jsonc
 {
   "session_id": "uuid",
-  "message": "string" // 用戶問題，或在 divining 狀態下傳送 "cast" 或任意字串觸發擲筊
+  "message": "string", // 一般對話訊息
+  // ⚠️ 在 divining 狀態下，必須傳入以下欄位之一：
+  "divination_result": "string", // 免費版 (holy/laughing/negative)
+  "divination_results": ["string", "string", "string"] // 付費版，三個結果的數組
 }
 ```
+
+> **注意**：系統不再自動隨機生成結果。前端必須先執行擲筊動畫，然後將動畫產生的最終結果傳遞給後端進行解讀。
 
 **狀態流轉說明：**
 1. `waiting_basic_info`: 等待用戶輸入姓名、性別、生日
@@ -264,8 +269,8 @@ http://localhost:8080
 4. `completed` (免費版) / `asking_for_question` (付費版): 擲筊完成，回傳結果解讀。
 
 > ⚠️ **注意：敏感詞過濾**
-> 在 `waiting_question` 狀態，若用戶輸入的問題涉及**投資、賭博、保證獲利**等敏感內容，系統將會拒絕服務。
-> - Response: 返回固定的拒絕訊息（"本平台不提供..."）。
+> 在 `waiting_question` 狀態，若用戶輸入的問題涉及**高風險關鍵詞**（如股票、期貨、樂透、賭博、保明牌），系統才會拒絕服務。
+> **注意**：對於**買房、置產、創業、薪資**等一般性金融或生涯規劃話題，**不再**視為敏感詞，系統將照常提供分析。
 > - State: 保持在 `waiting_question` 或結束（視實現而定，目前保持原狀態或允許重新提問）。
 
 **免費版 Response:**
