@@ -442,13 +442,13 @@ def handle_chat(version: str):
             }
         else:
             # 付費版：擲三次
-            # 必須從請求中獲取結果
-            results = data.get("divination_results")
+            # 優先從 divination_result 獲取，若無則嘗試 divination_results
+            results = data.get("divination_result") or data.get("divination_results")
 
             if not results or not isinstance(results, list) or len(results) != 3:
                 return jsonify(
                     {
-                        "error": "缺少或無效的擲筊結果 (divination_results，必須為包含3個結果的列表)"
+                        "error": "缺少或無效的擲筊結果 (需為包含3個結果的列表，參數名可為 divination_result 或 divination_results)"
                     }
                 ), 400
 
@@ -464,12 +464,26 @@ def handle_chat(version: str):
             if combination_data:
                 base_interpretation = combination_data.get("interpretation_text", "")
             else:
-                # Fallback if DB fetch fails
+                # 若資料庫無資料，使用 Fallback 解讀
                 print(
                     f"Warning: Interpretation for {combination_type} not found in DB."
                 )
-                base_interpretation = (
-                    "神意已決，請誠心感受。（資料庫連線異常，無法讀取詳細解讀）"
+
+                # 硬編碼 Fallback
+                FALLBACK_MAP = {
+                    "holy_holy_holy": "連三聖筊，大吉大利，神意完全認同，所求必應，萬事亨通。",
+                    "negative_negative_negative": "連三陰筊，時機未到或方法錯誤，神明不認同，建議暫緩或改變方向。",
+                    "laughing_laughing_laughing": "連三笑筊，情況未明或心意不定，神明笑而不答，請釐清問題後再問。",
+                    "holy_holy_negative": "兩聖一陰，大致順利但仍有變數，需謹慎執行。",
+                    "holy_holy_laughing": "兩聖一笑，方向正確但有些細節不需太執著，放鬆心情。",
+                    "negative_negative_holy": "兩陰一聖，雖有阻礙但轉機已現，堅持正道可獲神助。",
+                    "negative_negative_laughing": "兩陰一笑，此路不通且無需再問，應徹底反省或改變計畫。",
+                    "laughing_laughing_holy": "兩笑一聖，事情還在變化中，但最終結果是好的，保持信心。",
+                    "laughing_laughing_negative": "兩笑一陰，目前混沌不明且結果可能不佳，不建議冒進。",
+                    "mixed_all_three": "聖陰笑各一，情況複雜，好壞參半，需智慧判斷，步步為營。",
+                }
+                base_interpretation = FALLBACK_MAP.get(
+                    combination_type, "神意深奧，請依直覺行事。（無法讀取詳細解讀）"
                 )
 
             # 使用 AI 生成解讀
