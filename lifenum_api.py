@@ -139,10 +139,12 @@ def execute_module(
 
             # 若無連線，直接使用 get_grid_prompt 返回的訊息作為最終回應，無需調用 LLM
             system_prompt = get_grid_prompt(lines, counts)
-            number = len(lines)
+            number = (
+                lines if lines else ["none"]
+            )  # 回傳連線列表，若無連線則回傳 ["none"]
 
             if not lines:
-                return {"response": system_prompt, "number": 0}
+                return {"response": system_prompt, "number": number}
 
             grid_display = build_ascii_grid(counts)
             extra_info = f"九宮格：\n{grid_display}\n連線：{lines}\n"
@@ -487,8 +489,13 @@ def handle_chat(version: str):
                 },
             )
 
-        # 其他模組：計算完成後進入繼續選項狀態
-        conv_session.state = ConversationState.CONTINUE_SELECTION
+        # 免費版：計算完成後直接結束（completed）
+        # 付費版：進入繼續選項狀態（continue_selection）
+        if version == "free":
+            conv_session.state = ConversationState.COMPLETED
+        else:
+            conv_session.state = ConversationState.CONTINUE_SELECTION
+
         conv_session.add_message("assistant", result["response"])
 
         # 記錄到 memory（用於離開時生成總結）

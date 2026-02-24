@@ -661,9 +661,16 @@ curl -X POST http://localhost:8080/life/free/api/init_with_tone \
   "session_id": "string",       // 回傳原session_id
   "response": "AI回應內容",
   "state": "當前狀態",
-  "current_module": "當前模組"  // 如有
+  "current_module": "當前模組",  // 如有
+  "number": 5                   // ⚠️ 僅在模組初次計算完成時回傳
 }
 ```
+
+> ⚠️ **關於 `number` 參數**：
+> 1. 此參數僅在 **模組選定並完成初次計算** 的 Response 中出現（即當 state 從 `waiting_module_selection` 轉變為 `continue_selection` 或 `core_category_selection` 時）。
+> 2. 後續的深度對話（如 `waiting_core_question` 的回應）**不會**再次回傳此參數。
+> 3. **Grid (九宮格)** 模組回傳的是 **字串列表**，例如 `["123", "456"]`。若無連線則回傳 `["none"]`。
+> 4. 其他模組回傳的是 **整數**。
 
 #### 可能的狀態值
 - `waiting_basic_info` - 等待基本資訊
