@@ -207,6 +207,16 @@ def handle_chat(version: str):
     # 獲取語氣配置
     tone_prompts = get_tone_prompts(version)
 
+    # ========== 狀態機跳轉（支援連續詢問新數字） ==========
+    # 如果使用者在提問階段輸入了新的 1-4 位純數字，則強制切換回 WAITING_ANGEL_NUMBER 狀態
+    if conv_session.state in [AngelConversationState.ASKING_FOR_QUESTION, AngelConversationState.CONVERSATION]:
+        clean_input = user_input.strip()
+        if clean_input.isdigit() and len(clean_input) in [1, 2, 3, 4] and clean_input != getattr(conv_session, 'angel_number', ''):
+            conv_session.state = AngelConversationState.WAITING_ANGEL_NUMBER
+            # 清空先前的對話歷史（除了最初的兩則問候語與這則新輸入），避免被前面的內容影響
+            if len(conv_session.conversation_history) > 2:
+                conv_session.conversation_history = conv_session.conversation_history[:2] + [conv_session.conversation_history[-1]]
+
     # ========== 狀態機處理 ==========
 
     # 1. WAITING_BASIC_INFO - 等待基本資訊
@@ -542,30 +552,6 @@ def handle_chat(version: str):
             if keyword in user_input_lower and len(user_input) < 10:
                 wants_to_end = True
                 break
-
-        # 檢查是否試圖詢問新的天使數字
-        # 如果輸入純數字且與當前數字不同，提示需開啟新對話
-        if not wants_to_end:
-            clean_input = user_input.strip()
-            # 檢查是否為 3-4 位純數字，且與當前數字不同
-            if (
-                clean_input.isdigit()
-                and len(clean_input) in [3, 4]
-                and clean_input != conv_session.angel_number
-            ):
-                response = "您只能針對第一次的數字提問，新的數字請開啟新的對話串呦 ✨"
-                conv_session.add_message("assistant", response)
-                return save_and_return(
-                    version,
-                    session_id,
-                    conv_session,
-                    {
-                        "session_id": session_id,
-                        "response": response,
-                        "state": conv_session.state.value,
-                        "requires_input": True,
-                    },
-                )
 
         if wants_to_end:
             # 結束對話

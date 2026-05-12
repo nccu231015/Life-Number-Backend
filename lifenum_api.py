@@ -202,6 +202,9 @@ def execute_module(
         greeting = ""  # 付費版由語氣決定，通常不用固定格式
         tone_instruction = PAID_TONE_PROMPTS.get(tone, PAID_TONE_PROMPTS["guan_yu"])
 
+    # 處理數字為 0 的情況，顯示為「無」
+    display_number = "無" if number == 0 else str(number)
+
     # 組合完整的 system prompt
     # 如果有英文名字資訊，添加隱私保護指示
     privacy_note = (
@@ -228,9 +231,9 @@ def execute_module(
 
     # 建立 user prompt
     if user_purpose:
-        user_prompt = f"生日：{birthdate}\n{extra_info}計算結果數字：{number}\n\n【使用者的問題】\n{user_purpose}\n\n請先檢查問題是否違反【內容限制】規則。若違反，請直接拒絕。若無違反，請根據計算結果提供完整詳細的生命靈數解析，包含性格底色、優勢、人生方向等完整內容，並針對使用者的問題給予相應的指引與建議。回應必須包含指定的稱呼開頭，且內容詳盡。"
+        user_prompt = f"生日：{birthdate}\n{extra_info}計算結果數字：{display_number}\n\n【使用者的問題】\n{user_purpose}\n\n請先檢查問題是否違反【內容限制】規則。若違反，請直接拒絕。若無違反，請根據計算結果提供完整詳細的生命靈數解析，包含性格底色、優勢、人生方向等完整內容，並針對使用者的問題給予相應的指引與建議。回應必須包含指定的稱呼開頭，且內容詳盡。"
     else:
-        user_prompt = f"生日：{birthdate}\n{extra_info}計算結果數字：{number}\n\n請提供完整詳細的生命靈數解析，包含性格底色、優勢、人生方向等所有相關內容。回應必須包含指定的稱呼開頭，但主要重點是提供至少300字以上的深度解析內容，絕不可只有稱呼就結束。"
+        user_prompt = f"生日：{birthdate}\n{extra_info}計算結果數字：{display_number}\n\n請提供完整詳細的生命靈數解析，包含性格底色、優勢、人生方向等所有相關內容。回應必須包含指定的稱呼開頭，但主要重點是提供至少300字以上的深度解析內容，絕不可只有稱呼就結束。"
 
     # 調用 GPT API
     try:
@@ -255,7 +258,10 @@ def execute_module(
         if len(final_response.strip()) < 50:
             return {"error": "AI 回應異常（太短），請重試"}
 
-        return {"response": final_response, "number": number}
+        return {
+            "response": final_response,
+            "number": display_number,
+        }
     except Exception as e:
         print(f"[ERROR] execute_module 錯誤: {e}")
         import traceback
