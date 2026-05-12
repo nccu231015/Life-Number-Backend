@@ -576,8 +576,20 @@ def handle_chat(version: str):
         tone_config = PAID_TONE_PROMPTS.get(tone, PAID_TONE_PROMPTS["guan_gong"])
 
         from shared.gpt_client import GPTClient
+        from auspicious.modules.calendar_db import CalendarDB
 
         gpt_client = GPTClient()
+        calendar_db = CalendarDB()
+
+        # 獲取該月份黃曆資料，以便回答「其他適合日期」的問題
+        selected_date = auspicious_session.selected_date
+        year_month = selected_date[:7] if selected_date else ""
+        calendar_content = calendar_db.get_month_data(year_month) if year_month else ""
+
+        calendar_instruction = ""
+        if calendar_content:
+            category_name = CATEGORIES.get(auspicious_session.category, {}).get("name", auspicious_session.category)
+            calendar_instruction = f"\n\n參考資料（{year_month}月黃曆）：\n{calendar_content}\n\n若用戶詢問其他適合的日期，請從上述黃曆資料中挑選符合「{category_name}」或「{auspicious_session.specific_question}」宜忌且不沖用戶生肖（{auspicious_session.zodiac}）的確切日期推薦給用戶。"
 
         # 建立對話上下文
         system_prompt = f"""你是{tone_config["name"]}。
@@ -590,9 +602,10 @@ def handle_chat(version: str):
 
 用戶資訊：
 - 姓名：{auspicious_session.user_name}
+- 生肖：{auspicious_session.zodiac}
 - 選擇日期：{auspicious_session.selected_date}
 - 分類：{auspicious_session.category}
-- 具體事項：{auspicious_session.specific_question}
+- 具體事項：{auspicious_session.specific_question}{calendar_instruction}
 
 請保持角色一致，不要重複已經說過的內容，直接回答用戶的疑問。
 
