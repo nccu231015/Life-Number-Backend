@@ -590,7 +590,7 @@ def handle_chat(version: str):
         calendar_instruction = ""
         if calendar_content:
             category_name = CATEGORIES.get(auspicious_session.category, {}).get("name", auspicious_session.category)
-            calendar_instruction = f"\n\n參考資料（{year_month}月黃曆）：\n{calendar_content}\n\n若用戶詢問其他適合的日期，請從上述黃曆資料中挑選符合「{category_name}」或「{auspicious_session.specific_question}」宜忌且不沖用戶生肖（{auspicious_session.zodiac}）的確切日期推薦給用戶。"
+            calendar_instruction = f"\n\n參考資料（{year_month}月黃曆）：\n{calendar_content}\n\n若用戶詢問其他適合的日期，請從上述黃曆資料中挑選符合「{category_name}」或「{auspicious_session.specific_question}」宜忌且不沖用戶生肖（{auspicious_session.zodiac}）的確切日期推薦給用戶。**請注意：推薦的日期必須排除用戶原本選擇的日期「{selected_date}」（因為用戶是詢問「其他」日子，請推薦與這天不同的其他吉日）。**"
 
         # 建立對話上下文
         system_prompt = f"""你是{tone_config["name"]}。
