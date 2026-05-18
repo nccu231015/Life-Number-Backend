@@ -467,6 +467,7 @@ def handle_chat(version: str):
 3. 如果黃曆中有「沖」的生肖，檢查是否沖到用戶的生肖（{auspicious_session.zodiac}），說明可能的影響和化解方式
 4. 提供綜合性的建議
 5. 語氣要符合「{auspicious_session.tone}」，親切且專業。**請務必在回答中使用用戶的名字「{auspicious_session.user_name}」，嚴禁使用「親愛的使用者」或「用戶」等泛稱。**
+6. **【語言要求】必須完全使用繁體中文（台灣習慣用語）進行回覆。嚴禁夾雜任何英文單字、標題或半中文半英文的語句（例如：絕對不能出現「其他 consider」、「其他 considerations」等英文字，請統一寫成「其他考量事項」或「注意事項」）。**
 
 {load_global_rules()}
 """
@@ -608,6 +609,7 @@ def handle_chat(version: str):
 - 具體事項：{auspicious_session.specific_question}{calendar_instruction}
 
 請保持角色一致，不要重複已經說過的內容，直接回答用戶的疑問。
+**【語言與風格要求】必須完全使用繁體中文進行回覆，保持對應神明的莊嚴或溫和語氣。嚴禁夾雜任何英文單字或標題（如「其他 consider」等），若需表達考量、注意事項，請統一使用純中文。**
 
 {load_global_rules()}"""
 
