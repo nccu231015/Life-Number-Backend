@@ -6,12 +6,6 @@ from .db import LifeNumberDB
 def get_expression_prompt(number: int) -> str:
     """從資料庫獲取表達數提示詞"""
     try:
-        db = LifeNumberDB()
-        data = db.get_expression(number)
-
-        if not data:
-            return "（系統錯誤：無法讀取生命靈數資料庫）"
-
         if number == 0:
             return (
                 "你是一位生命靈數專家。請依照以下規則輸出內容，使用繁體中文。請使用純文字回覆。\n"
@@ -23,6 +17,12 @@ def get_expression_prompt(number: int) -> str:
                 "- 意義解析：說明計算表達數需要使用護照英文姓名（全部字母），如果此處為「無」代表需要補齊英文姓名資訊才能進行精準分析。\n"
                 "- 溫馨建議：引導並鼓勵使用者提供正確的英文拼音以解鎖整體天賦才能與處事風格的深入分析。\n"
             )
+
+        db = LifeNumberDB()
+        data = db.get_expression(number)
+
+        if not data:
+            return "（系統錯誤：無法讀取生命靈數資料庫）"
 
         title = data.get("title", "")
         desc = data.get("description", "")
