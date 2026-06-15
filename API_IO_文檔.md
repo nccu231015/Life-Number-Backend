@@ -27,7 +27,7 @@
 - **占卜系統**：2 個資料表（combinations, tone_greetings）
 - **黃道吉日**：1 個資料表（auspicious_calendar - 月份黃曆資料）
 
-I/O 規格文檔
+## 📡 I/O 規格文檔
 
 > 📡 **部署狀態**: 可部署至 GCP Cloud Run  
 > 🔐 **安全性**: HTTPS + Secret Manager  
@@ -207,7 +207,7 @@ http://localhost:8080
    - **有問題**：進入對話模式，針對該數字進行深入問答
    - **沒問題**：對話結束
 6. **持續對話**：可多輪提問，直到用戶說謝謝/結束
-   > 💡 **進階功能**：在對話過程中，若用戶輸入新的 1~4 位純數字（例如：突然問「那 444 呢？」），系統會自動偵測並將狀態重置回 `waiting_angel_number`，重新啟動新數字的分析，無需另外開啟新對話串。
+   > 💡 **進階功能**：在 `asking_for_question` 或 `conversation` 狀態下，若用戶輸入新的 1~4 位**純數字**（例如直接輸入 `444`，不可含文字如「那 444 呢？」），且與目前分析中的數字不同，系統會自動將狀態重置回 `waiting_angel_number`，重新啟動新數字的分析，無需另外開啟新對話串。
 
 ---
 
@@ -662,7 +662,7 @@ curl -X POST http://localhost:8080/life/free/api/init_with_tone \
   "response": "AI回應內容",
   "state": "當前狀態",
   "current_module": "當前模組",  // 如有
-  "number": 5                   // ⚠️ 僅在模組初次計算完成時回傳
+  "number": 5                   // ⚠️ 僅在模組初次計算完成時回傳（可能為整數、字串或字串列表，見下方說明）
 }
 ```
 
@@ -670,7 +670,8 @@ curl -X POST http://localhost:8080/life/free/api/init_with_tone \
 > 1. 此參數僅在 **模組選定並完成初次計算** 的 Response 中出現（即當 state 從 `waiting_module_selection` 轉變為 `continue_selection` 或 `core_category_selection` 時）。
 > 2. 後續的深度對話（如 `waiting_core_question` 的回應）**不會**再次回傳此參數。
 > 3. **Grid (九宮格)** 模組回傳的是 **字串列表**，例如 `["123", "456"]`。若無連線則回傳 `["none"]`。
-> 4. 其他模組回傳的是 **整數**。
+> 4. 一般模組（core, birthday, year, maturity, challenge 等）回傳 **整數**（如 `5`、`8`）。
+> 5. **特殊情況 — 計算結果為 0**：`soul`（靈魂數）、`personality`（人格數）、`expression`（表達數）、`karma`（業力數）在無法計算或無特定業力時，回傳字串 `"無"` 而非 `0`。常見原因：未提供英文姓名（靈魂/人格/表達數），或生日無 13/14/16/19 業力數（業力數）。
 
 #### 可能的狀態值
 - `waiting_basic_info` - 等待基本資訊
@@ -1172,7 +1173,8 @@ Response: {
 |---|---|---|
 | `waiting_basic_info` | 等待基本資訊 | **表單輸入**：<br>- 姓名 (Text)<br>- 性別 (Select: 男/女)<br>- 生日 (Date Picker) |
 | `waiting_angel_number` | 等待天使數字 | **免費版**：下拉選單或按鈕 (1111, 2222... 9999)<br>**付費版**：數字輸入框 (Number Input) |
-| `asking_for_question` | 詢問是否有問題<br>(僅付費版) | **對話介面**：<br>- 文字輸入框 (輸入問題)<br>- 「沒有問題/謝謝」按鈕 (結束對話) |
+| `asking_for_question` | 詢問是否有問題<br>(僅付費版) | **對話介面**：<br>- 文字輸入框 (輸入問題)<br>- 「沒有問題/謝謝」按鈕 (結束對話)<br>- **提示**：可輸入 1~4 位純數字切換新天使數字 |
+| `conversation` | 持續深度對話<br>(僅付費版) | **對話介面**：<br>- 文字輸入框 (輸入追問)<br>- 「沒有問題/謝謝」按鈕 (結束對話)<br>- **提示**：可輸入 1~4 位純數字切換新天使數字 |
 | `completed` | 已完成 | **結束畫面**：<br>- 顯示完整解讀<br>- 「重新開始」按鈕 |
 
 ### 3. 擲筊 (Divination)
@@ -1527,6 +1529,52 @@ curl -X POST http://localhost:8080/angel/free/api/init_with_tone \
 - `waiting_basic_info` - 等待基本資訊(姓名、性別、生日)
 - `waiting_angel_number` - 等待天使數字選擇
 - `completed` - 已完成
+
+---
+
+#### **POST** `/angel/paid/api/init_with_tone`
+
+付費版初始化，Request/Response 格式同免費版，但 `tone` 可選 10 種高級語氣（如 `guan_yu`、`michael` 等）。
+
+**範例:**
+```bash
+curl -X POST http://localhost:8080/angel/paid/api/init_with_tone \
+  -H "Content-Type: application/json" \
+  -d '{"tone": "guan_yu"}'
+```
+
+---
+
+#### **POST** `/angel/paid/api/chat`
+
+付費版對話互動，Request 格式同免費版。
+
+**Response 額外欄位:**
+```jsonc
+{
+  "session_id": "string",
+  "response": "AI回應內容",
+  "state": "當前狀態",
+  "angel_number": "123",       // 解讀完成時回傳
+  "pattern": "ascending",      // 智能模式識別結果（如 repetition, ascending, mirror 等）
+  "requires_input": true/false
+}
+```
+
+**可能的狀態值:**
+- `waiting_basic_info` - 等待基本資訊
+- `waiting_angel_number` - 等待天使數字輸入（支援任意 1~4 位數字）
+- `asking_for_question` - 解讀完成，詢問是否有問題
+- `conversation` - 持續深度對話中
+- `completed` - 已完成
+
+> 💡 **動態切換數字**：在 `asking_for_question` 或 `conversation` 狀態下，用戶輸入 1~4 位純數字（且與目前數字不同）即可切換至新數字分析，無需重新初始化 Session。
+
+---
+
+#### **POST** `/angel/paid/api/reset`
+
+付費版重置會話，格式同免費版 `/angel/free/api/reset`。
 
 ---
 
